@@ -1,0 +1,71 @@
+# This workflow runs when a tag is pushed to the repository point to the main branch.
+# It builds the project on multiple operating systems (Ubuntu, Windows, and macOS) and
+# creates a pre-release.
+
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+  build:
+    name: Build Project
+    needs: release
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - { name: "Windows gcc", os: windows-latest, cc: "gcc", cxx: "g++" }
+          - { name: "Ubuntu gcc", os: ubuntu-latest, cc: "gcc", cxx: "g++" }
+          - { name: "MacOS clang", os: macos-latest, cc: "clang", cxx: "clang++" }
+        build-configuration: [ Release ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+
+      - name: Build Project
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          args: -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build-configuration }}
+          c-compiler: ${{ matrix.config.cc }}
+          cxx-compiler: ${{ matrix.config.cxx }}
+
+      - name: Compress Build Directory
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          path: 'build'
+          filename: '${{ matrix.config.os}}-build.zip'
+
+      - name: Upload Release Asset
+        uses: alexellis/upload-assets@0.4.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+         asset_paths: '["${{ matrix.config.os}}-build.zip"]'

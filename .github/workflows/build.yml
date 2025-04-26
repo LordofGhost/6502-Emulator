@@ -1,0 +1,36 @@
+# It builds the project on multiple operating systems (Ubuntu, Windows, and macOS)
+
+name: Build Project
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  debug:
+    name: Build
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - { name: "Windows gcc", os: windows-latest, cc: "gcc", cxx: "g++" }
+          - { name: "Ubuntu gcc", os: ubuntu-latest, cc: "gcc", cxx: "g++" }
+          - { name: "MacOS clang", os: macos-latest, cc: "clang", cxx: "clang++" }
+        build-configuration: [ Debug, Release ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+
+      - name: Build Project
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          args: -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.build-configuration }}
+          c-compiler: ${{ matrix.config.cc }}
+          cxx-compiler: ${{ matrix.config.cxx }}
