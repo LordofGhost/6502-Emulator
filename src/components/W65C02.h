@@ -3,25 +3,29 @@
 
 #include <iostream>
 
-// CPU
+#include "../Main.h"
+
+/* CPU
+ * Diagram: https://davidmjc.github.io/6502/bd.svg
+ */
 
 class W65C02 {
-public:
-    std::uint8_t dataBus;
-    std::uint16_t addressBus;
+   public:
+    Byte dataBus;
+    Word addressBus;
 
-private:
+   private:
     // Main registers
-    std::uint8_t A; // Accumulator
+    Byte A;  // Accumulator
 
     // Index registers
-    std::uint8_t X; // X index
-    std::uint8_t Y; // Y index
-    std::uint8_t S; // Stack pointer
+    Byte X;  // X index
+    Byte Y;  // Y index
+    Byte S;  // Stack pointer
 
-    std::uint16_t PC; // Program Counter
+    Word PC;  // Program Counter
 
-    std::uint8_t P; // Processor flags
+    Byte P;  // Processor flags
     /* NV-BDIZC (7-0)
      * N = Negative
      * V = Overflow
@@ -32,6 +36,11 @@ private:
      * Z = Zero
      * C = Carry
      * Source: https://www.nesdev.org/wiki/Status_flags */
+
+    void decodeLogic(Byte IR);  // IR = Instruction Register
+
+   public:
+    void reset();
 };
 
 #endif  // W65C02_H
