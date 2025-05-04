@@ -7,14 +7,15 @@
 
 enum Exception_t { e_INFO, e_WARNING, e_CRITICAL };
 
-class Exception {
+class Exception : std::exception {
    private:
     Component component;
     Exception_t type;
     unsigned int code;
+    std::string description;
 
    public:
-    Exception(Component component, Exception_t type, unsigned int code);
+    Exception(Component component, Exception_t type, unsigned int code, const char* description);
     std::string toString() const;
 
    private:

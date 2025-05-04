@@ -1,14 +1,18 @@
 #include "Exception.h"
 
-Exception::Exception(Component component, Exception_t type, unsigned int code) {
+Exception::Exception(Component component, Exception_t type, unsigned int code,
+                     const char* description) {
     this->component = component;
     this->type = type;
     this->code = code;
+    description == nullptr ? this->description = "Unknown Error"
+                           : this->description = std::string(description);
 }
 
 std::string Exception::toString() const {
     return std::string("-- Exception --\nComponent: " + componentString() +
-                       "\nType: " + typeString() + "\nCode: " + std::to_string(this->code));
+                       "\nType: " + typeString() + "\nCode: " + std::to_string(this->code) +
+                       "\nDescription: " + this->description);
 }
 
 std::string Exception::componentString() const {

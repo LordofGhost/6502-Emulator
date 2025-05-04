@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "Exception.h"
 #include "components/AS6C62256.h"
 #include "components/AT28C256.h"
 #include "components/W65C02.h"

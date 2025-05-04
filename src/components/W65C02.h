@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "../Exception.h"
 #include "../Main.h"
 
 /* CPU
@@ -10,11 +11,10 @@
  */
 
 class W65C02 {
-   public:
+   private:
     Byte dataBus;
     Word addressBus;
 
-   private:
     // Main registers
     Byte A;  // Accumulator
 
@@ -25,22 +25,35 @@ class W65C02 {
 
     Word PC;  // Program Counter
 
-    Byte P;  // Processor flags
-    /* NV-BDIZC (7-0)
-     * N = Negative
-     * V = Overflow
-     * - = (always set)
-     * B = Break (always set)
-     * D = Decimal
-     * I = Interrupt Disable
-     * Z = Zero
-     * C = Carry
-     * Source: https://www.nesdev.org/wiki/Status_flags */
+    Byte P;   // Processor flags
+              /* NV-BDIZC (7-0)
+               * N = Negative
+               * V = Overflow
+               * - = (always set)
+               * B = Break (always set)
+               * D = Decimal
+               * I = Interrupt Disable
+               * Z = Zero
+               * C = Carry
+               * Source: https://www.nesdev.org/wiki/Status_flags */
+    bool RW;  // true = Read; false = Write
 
     void decodeLogic(Byte IR);  // IR = Instruction Register
 
    public:
-    void reset();
+    // Getter & Setter
+
+    Byte getDataBus() const { return dataBus; }
+    void setDataBus(const Byte& data) {
+        if (RW == false)
+            throw Exception(e_ROM, e_CRITICAL, 2,
+                            "Cannot write to databus, because RW is set to false.");
+        dataBus = data;
+    };
+
+    Word getAddressBus() const { return addressBus; }
+
+    bool getRW() const { return RW; };
 };
 
 #endif  // W65C02_H
