@@ -1,7 +1,7 @@
 #include "Exception.h"
 
 Exception::Exception(Component component, Exception_t type, unsigned int code,
-                     const char* description) {
+                     const char* description) noexcept {
     this->component = component;
     this->type = type;
     this->code = code;
@@ -9,13 +9,13 @@ Exception::Exception(Component component, Exception_t type, unsigned int code,
                            : this->description = std::string(description);
 }
 
-std::string Exception::toString() const {
+std::string Exception::toString() const noexcept {
     return std::string("-- Exception --\nComponent: " + componentString() +
                        "\nType: " + typeString() + "\nCode: " + std::to_string(this->code) +
                        "\nDescription: " + this->description);
 }
 
-std::string Exception::componentString() const {
+std::string Exception::componentString() const  noexcept {
     switch (this->component) {
         case e_CPU:
             return "CPU";
@@ -30,7 +30,7 @@ std::string Exception::componentString() const {
     }
 }
 
-std::string Exception::typeString() const {
+std::string Exception::typeString() const noexcept {
     switch (this->type) {
         case e_INFO:
             return "info";
