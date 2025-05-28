@@ -3,10 +3,6 @@
 
 // Versatile Interface Adapter
 
-class W65C22 {
+class W65C22 {};
 
-};
-
-
-
-#endif //W65C22_H
+#endif  // W65C22_H
