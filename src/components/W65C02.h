@@ -11,6 +11,42 @@
  */
 
 class W65C02 {
+   public:
+    W65C02() : bus(*this), registers(*this), instructions(*this) {
+        // All these methods are already implemented
+        // decodeLogic[0x00] = [this]() -> void { return instructions.I_00(); };
+    }
+
+    // This methode represents the reset button, which also starts the computer
+    void reset() noexcept;
+
+    // This methode stops the CPU from executing
+    void stop() { b_stop = true; }
+
+    struct Bus {
+       private:
+        Byte dataBus = 0;
+        Word addressBus = 0;
+        W65C02& CPU;
+
+       public:
+        // This reference is needed to be able to access non-static members of W65C02
+        explicit Bus(W65C02& parentRef) : CPU(parentRef) {}
+
+        [[nodiscard]] Byte getData() const { return dataBus; }
+        void setData(const Byte& data) {
+            if (CPU.registers.RW == false)
+                throw EmulatorException(e_ROM, e_CRITICAL, 2,
+                                        "Cannot write to databus, because RW is set to false.");
+            dataBus = data;
+        };
+
+        [[nodiscard]] Word getAddress() const { return addressBus; }
+        void setAddress(const Word& address) { addressBus = address; }
+    } bus;
+    // make RW flag visible to memory
+    [[nodiscard]] bool getRW() const { return registers.RW; }  // make RW flag visible to memory
+
    private:
     Byte dataBus;
     Word addressBus;
