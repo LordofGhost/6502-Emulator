@@ -8,9 +8,8 @@ enum Component {
   e_CPU,
   e_RAM,
   e_ROM,
-  e_IO
+  e_IO,
+  e_Clock
 };
-
-class Main {};
 
 #endif  // MAIN_H
