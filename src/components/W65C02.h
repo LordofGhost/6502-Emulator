@@ -370,19 +370,7 @@ class W65C02 {
     } instructions;
 
    public:
-    // Getter & Setter
-
-    Byte getDataBus() const { return dataBus; }
-    void setDataBus(const Byte& data) {
-        if (RW == false)
-            throw Exception(e_ROM, e_CRITICAL, 2,
-                            "Cannot write to databus, because RW is set to false.");
-        dataBus = data;
-    };
-
-    Word getAddressBus() const { return addressBus; }
-
-    bool getRW() const { return RW; };
+    std::string toString() const;
 };
 
 #endif  // W65C02_H
