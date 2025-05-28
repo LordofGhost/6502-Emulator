@@ -1,6 +1,6 @@
-#include "Exception.h"
+#include "EmulatorException.h"
 
-Exception::Exception(Component component, Exception_t type, unsigned int code,
+EmulatorException::EmulatorException(Component component, Exception_t type, unsigned int code,
                      const char* description) noexcept {
     this->component = component;
     this->type = type;
@@ -9,13 +9,14 @@ Exception::Exception(Component component, Exception_t type, unsigned int code,
                            : this->description = std::string(description);
 }
 
-std::string Exception::toString() const noexcept {
+std::string EmulatorException::toString() const noexcept {
     return std::string("-- Exception --\nComponent: " + componentString() +
                        "\nType: " + typeString() + "\nCode: " + std::to_string(this->code) +
-                       "\nDescription: " + this->description);
+                       "\nDescription: " + this->description +
+                       "\n---------------");
 }
 
-std::string Exception::componentString() const  noexcept {
+std::string EmulatorException::componentString() const  noexcept {
     switch (this->component) {
         case e_CPU:
             return "CPU";
@@ -30,7 +31,7 @@ std::string Exception::componentString() const  noexcept {
     }
 }
 
-std::string Exception::typeString() const noexcept {
+std::string EmulatorException::typeString() const noexcept {
     switch (this->type) {
         case e_INFO:
             return "info";
