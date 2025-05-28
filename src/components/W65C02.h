@@ -48,33 +48,40 @@ class W65C02 {
     [[nodiscard]] bool getRW() const { return registers.RW; }  // make RW flag visible to memory
 
    private:
-    Byte dataBus;
-    Word addressBus;
+    bool b_stop = false;
+    struct Registers {
+        Byte A;  // Accumulator
 
-    // Main registers
-    Byte A;  // Accumulator
+        // Index registers
+        Byte X;  // X index
+        Byte Y;  // Y index
+        Byte S;  // Stack pointer
 
-    // Index registers
-    Byte X;  // X index
-    Byte Y;  // Y index
-    Byte S;  // Stack pointer
+        Word PC;  // Program Counter
 
-    Word PC;  // Program Counter
+        // Processor flags NV-BDIZC (7-0)
+        struct s_P {
+            bool N;               // Negative
+            bool V;               // Overflow
+            const bool B = true;  // Break (always set)
+            bool D;               // Decimal
+            bool I;               // Interrupt Disable
+            bool Z;               // Zero
+            bool C;               // Carry
 
-    Byte P;   // Processor flags
-              /* NV-BDIZC (7-0)
-               * N = Negative
-               * V = Overflow
-               * - = (always set)
-               * B = Break (always set)
-               * D = Decimal
-               * I = Interrupt Disable
-               * Z = Zero
-               * C = Carry
-               * Source: https://www.nesdev.org/wiki/Status_flags */
-    bool RW;  // true = Read; false = Write
+            Byte getByte() {
+                return (N << 7) + (V << 6) + (B << 4) + (D << 3) + (I << 2) + (Z << 1) + C;
+            }
+        } P;
 
-    void decodeLogic(Byte IR);  // IR = Instruction Register
+        bool RW;  // true = Read; false = Write
+
+        // This reference is needed to be able to access non-static members of W65C02
+        explicit Registers(W65C02& parent) : CPU(parent) {}
+
+       private:
+        W65C02& CPU;
+    } registers;
 
    public:
     // Getter & Setter
