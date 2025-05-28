@@ -12,20 +12,25 @@
 class AS6C62256 {
    private:
     Byte* memory_ptr;
+    /* $0000 - $00FF Zero Page
+     * $0100 - $01FF Stack */
 
    public:
     static constexpr Word size = 32768;  // In bytes, 0x8000 in hex
 
     AS6C62256() { memory_ptr = new Byte[size]; }
 
-    ~AS6C62256()() { delete[] memory_ptr; }
+    ~AS6C62256() { delete[] memory_ptr; }
 
     void reset();
 
     void read() const;
     void write() const;
 
-    std::string dump(Word begin = 0, Word end = size - 1) const;  // Only ment for debugging features
+    std::string dump(Word begin = 0,
+                     Word end = size - 1) const;  // Only ment for debugging features
+
+    std::string toString() const;
 };
 
 #endif  // AS6C62256_H
