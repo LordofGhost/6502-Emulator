@@ -30,8 +30,12 @@ public:
 
   std::string toString() const {
     return "-- Clock --\n"
-           "Cycle count: " + std::to_string(cycles) + '\n' +
-           "-----------";
+           "Cycle count: " + std::to_string(cycles) + '\n';
+  }
+
+  std::string toStringMD() const {
+    return "# Clock\n"
+           "Cycle count: " + std::to_string(cycles) + '\n';
   }
 };
 
