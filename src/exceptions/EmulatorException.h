@@ -18,6 +18,7 @@ class EmulatorException : std::exception {
     EmulatorException(Component component, Exception_t type, unsigned int code,
               const char* description) noexcept;
     std::string toString() const noexcept;
+    std::string toStringMD() const noexcept;
 
    private:
     std::string componentString() const noexcept;
