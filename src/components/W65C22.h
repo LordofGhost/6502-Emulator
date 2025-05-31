@@ -7,7 +7,7 @@
 
 class W65C22 {
 public:
-  std::string toString() const;
+  std::string toStringMD() const;
 };
 
 #endif  // W65C22_H

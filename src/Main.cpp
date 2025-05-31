@@ -7,8 +7,8 @@
 #include "components/CrystalOscillator.h"
 #include "components/W65C02.h"
 #include "components/W65C22.h"
-#include "tools/Logs.h"
 #include "exceptions/EmulatorException.h"
+#include "tools/Logs.h"
 
 // Create components in data segment
 W65C02 CPU;
@@ -16,6 +16,9 @@ AS6C62256 RAM;
 AT28C256 ROM;
 W65C22 IO;
 CrystalOscillator Clock;
+
+// Create exception vector
+std::vector<EmulatorException> EmulatorExceptions;
 
 int main(int argc, char* argv[]) {
     struct {
@@ -49,7 +52,8 @@ int main(int argc, char* argv[]) {
                      "\t-h --help\t\t\tDisplays help with available flags and value parameters.\n"
                      "\t-p --path\t\t\tSpecifies the path to the ROM file.\n"
                      "\t-l --log\t\t\tCreate log file when process terminates."
-                     "" << std::endl;
+                     ""
+                  << std::endl;
         return 0;
     }
 
@@ -70,7 +74,6 @@ int main(int argc, char* argv[]) {
 
     // Debug
     std::cout << "---- Debug ----" << std::endl;
-    std::cout << ROM.dump(0, 19) << std::endl;
     std::cout << Clock.toString() << std::endl;
     // end Debug
 }

@@ -1,7 +1,6 @@
 #include "W65C22.h"
 
-std::string W65C22::toString() const {
+std::string W65C22::toStringMD() const {
     // TODO
-    return "-- IO --\n"
-           "--------\n";
+    return "# IO\n";
 }

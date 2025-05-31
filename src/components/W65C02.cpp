@@ -41,6 +41,6 @@ void W65C02::reset() noexcept {
 
 void W65C02::Instructions::I_00() { CPU.registers.P.I = true; }
 
-std::string W65C02::toString() const {
-    return "-- CPU --\n" + bus.toString() + registers.toString();
+std::string W65C02::toStringMD() const {
+    return "# CPU\n" + bus.toStringMD() + registers.toStringMD();
 }

@@ -1,8 +1,8 @@
 #include "Logs.h"
 
 #include <filesystem>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 #include "../components/AS6C62256.h"
 #include "../components/AT28C256.h"
@@ -15,15 +15,17 @@ extern AS6C62256 RAM;
 extern AT28C256 ROM;
 extern W65C22 IO;
 extern CrystalOscillator Clock;
+extern std::vector<EmulatorException> EmulatorExceptions;
 
 void Logs::all() {
     std::string content = "";
 
-    content += CPU.toString();
-    //content += RAM.toString();
-    //content += ROM.toString();
-    content += IO.toString();
-    content += Clock.toString();
+    content += CPU.toStringMD();
+    content += RAM.toStringMD();
+    // content += ROM.toStringMD();
+    content += IO.toStringMD();
+    content += Clock.toStringMD();
+    content += exceptions();
 
     createFile(content);
 }
@@ -32,19 +34,19 @@ void Logs::component(Component component) {
 
     switch (component) {
         case e_CPU:
-            content += CPU.toString();
+            content += CPU.toStringMD();
             break;
         case e_RAM:
-            content += RAM.toString();
+            content += RAM.toStringMD();
             break;
         case e_ROM:
-            content += ROM.toString();
+            content += ROM.toStringMD();
             break;
         case e_IO:
-            content += IO.toString();
+            content += IO.toStringMD();
             break;
         case e_Clock:
-            content += Clock.toString();
+            content += Clock.toStringMD();
             break;
         default:
             content += "This not a component or it is not available in logs.";
@@ -54,6 +56,14 @@ void Logs::component(Component component) {
     createFile(content);
 }
 
+std::string Logs::exceptions() {
+    std::string content = "# Exceptions\n\n";
+
+    for (EmulatorException exception : EmulatorExceptions) content += exception.toStringMD();
+
+    return content;
+}
+
 std::string Logs::getFileName() {
     auto now = std::chrono::system_clock::now();
     std::time_t time = std::chrono::system_clock::to_time_t(now);
@@ -61,7 +71,7 @@ std::string Logs::getFileName() {
 
     std::ostringstream oss;
     oss << std::put_time(localTime, "T:%H_%M_%S_D:%Y-%m-%d");
-    return "C:" + std::to_string(Clock.getCycles()) + "_" + oss.str() + ".txt";
+    return "C:" + std::to_string(Clock.getCycles()) + "_" + oss.str() + ".md";
 }
 
 void Logs::createFile(const std::string& content) {

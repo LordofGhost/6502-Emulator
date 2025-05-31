@@ -11,6 +11,7 @@ class Logs {
     void static component(Component component);
 
    private:
+    std::string static exceptions();
     std::string static getFileName();
     void static createFile(const std::string &content);
 };
