@@ -1,9 +1,9 @@
 add_subdirectory(components)
+add_subdirectory(exceptions)
+add_subdirectory(tools)
 
 add_executable(emulator
         Main.cpp
-        Exception.cpp
-        Tools.cpp
 )
 
-target_link_libraries(emulator PRIVATE components)
+target_link_libraries(emulator PRIVATE components exceptions tools nlohmann_json::nlohmann_json)

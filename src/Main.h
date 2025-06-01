@@ -4,13 +4,15 @@
 #define Byte unsigned char
 #define Word unsigned short
 
-enum Component {
-  e_CPU,
-  e_RAM,
-  e_ROM,
-  e_IO
-};
+#include <string>
 
-class Main {};
+enum Component { e_CPU, e_RAM, e_ROM, e_IO, e_Clock };
+
+struct Arguments {
+    std::string programPath;
+    bool help = false;
+    bool logs = false;
+    bool logsAll = false;
+};
 
 #endif  // MAIN_H

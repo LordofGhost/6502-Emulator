@@ -44,10 +44,13 @@ class W65C02 {
         [[nodiscard]] Word getAddress() const { return addressBus; }
         void setAddress(const Word& address) { addressBus = address; }
 
-        std::string toString() const {
-            return "\t-- Bus --"
-                   "\n\tData: " +
-                   std::to_string(dataBus) + "\n\tAddress: " + std::to_string(addressBus) + "\n";
+        std::string toStringMD() const {
+            return "## Bus\n"
+                   "| Bus | Value (dec) |\n"
+                   "|-----|-------------|\n"
+                   "| Data | " +
+                   std::to_string(dataBus) + " |\n" + "| Address | " + std::to_string(addressBus) +
+                   " |\n";
         }
     } bus;
     // make RW flag visible to memory
@@ -79,15 +82,16 @@ class W65C02 {
                 return (N << 7) + (V << 6) + (B << 4) + (D << 3) + (I << 2) + (Z << 1) + C;
             }
 
-            std::string toString() const {
-                return "\t\t-- Processor flags --"
-                       "\n\t\tN (Negative): " +
-                       std::to_string(N) + "\n\t\tV (Overflow): " + std::to_string(V) +
-                       "\n\t\tB (Break): " + std::to_string(B) +
-                       "\n\t\tD (Decimal): " + std::to_string(D) +
-                       "\n\t\tI (Interrupt Disable): " + std::to_string(I) +
-                       "\n\t\tZ (Zero): " + std::to_string(Z) +
-                       "\n\t\tC (Carry): " + std::to_string(C) + '\n';
+            std::string toStringMD() const {
+                return "### Processor flags\n"
+                       "| Register | Value (dec) |\n"
+                       "|----------|-------------|\n"
+                       "| N (Negative) | " +
+                       std::to_string(N) + " |\n" + "| V (Overflow) | " + std::to_string(V) +
+                       " |\n" + "| B (Break) | " + std::to_string(B) + " |\n" + "| D (Decimal) | " +
+                       std::to_string(D) + " |\n" + "| I (Interrupt Disable) | " +
+                       std::to_string(I) + " |\n" + "| Z (Zero) | " + std::to_string(Z) + " |\n" +
+                       "| C (Carry) |" + std::to_string(C) + " |\n";
             }
         } P;
 
@@ -96,14 +100,15 @@ class W65C02 {
         // This reference is needed to be able to access non-static members of W65C02
         explicit Registers(W65C02& parent) : CPU(parent) {}
 
-        std::string toString() const {
-            return "\t-- Registers --"
-                   "\n\tA (Accumulator): " +
-                   std::to_string(A) + "\n\tX (X index): " + std::to_string(X) +
-                   "\n\tY (Y index): " + std::to_string(Y) +
-                   "\n\tS (Stack pointer): " + std::to_string(S) +
-                   "\n\tPC (Program Counter): " + std::to_string(PC) +
-                   "\n\tRW (Read/Write): " + std::to_string(RW) + "\n" + P.toString();
+        std::string toStringMD() const {
+            return "## Registers\n"
+                   "| Register | Value |\n"
+                   "|----------|-------|\n"
+                   "| A (Accumulator) | " +
+                   std::to_string(A) + " |\n" + "| X (X index) | " + std::to_string(X) + " |\n" +
+                   "| Y (Y index) | " + std::to_string(Y) + " |\n" + "| S (Stack pointer) |" +
+                   std::to_string(S) + " |\n" + "| PC (Program Counter) | " + std::to_string(PC) +
+                   " |\n" + "| RW (Read/Write) | " + std::to_string(RW) + " |\n" + P.toStringMD();
         }
 
        private:
@@ -397,7 +402,7 @@ class W65C02 {
     } instructions;
 
    public:
-    std::string toString() const;
+    std::string toStringMD() const;
 };
 
 #endif  // W65C02_H

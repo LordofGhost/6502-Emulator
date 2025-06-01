@@ -2,15 +2,19 @@
 
 #include <iostream>
 
-#include "AT28C256.h"
+#include "../tools/Logs.h"
 #include "CrystalOscillator.h"
+#include "memory/AT28C256.h"
 
 extern AT28C256 ROM;
 extern CrystalOscillator Clock;
+extern Arguments arguments;
 
 void W65C02::reset() noexcept {
     b_stop = false;
     std::function<void()> nextCall;
+
+    if (arguments.logsAll) Logs::log();
 
     // Reset cycle
     registers.PC = 0xFFFC;  // $FFFC, $FFFD Reset vector
@@ -32,15 +36,16 @@ void W65C02::reset() noexcept {
 
             // Execute
             nextCall();
-        } catch (EmulatorException e) {
+        } catch (EmulatorException &e) {
             std::cout << e.toString() << std::endl;
             b_stop = true;
         }
+        if (arguments.logsAll) Logs::log();
     }
 }
 
 void W65C02::Instructions::I_00() { CPU.registers.P.I = true; }
 
-std::string W65C02::toString() const {
-    return "-- CPU --\n" + bus.toString() + registers.toString();
+std::string W65C02::toStringMD() const {
+    return "# CPU\n" + bus.toStringMD() + registers.toStringMD();
 }
