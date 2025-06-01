@@ -2,13 +2,14 @@
 
 #include <filesystem>
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <sstream>
 
-#include "../components/memory/AS6C62256.h"
-#include "../components/memory/AT28C256.h"
 #include "../components/CrystalOscillator.h"
 #include "../components/W65C02.h"
 #include "../components/W65C22.h"
+#include "../components/memory/AS6C62256.h"
+#include "../components/memory/AT28C256.h"
 
 extern W65C02 CPU;
 extern AS6C62256 RAM;
