@@ -7,8 +7,7 @@
 
 class Logs {
    public:
-    void static all();
-    void static component(Component component);
+    void static log();
 
    private:
     std::string static exceptions();

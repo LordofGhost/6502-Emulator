@@ -8,4 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v -g3 -fno-omit-frame-pointer")
 
+# Copy log config file
+file(COPY ${CMAKE_SOURCE_DIR}/logsConfig.json DESTINATION ${CMAKE_BINARY_DIR}/src)
+
 add_subdirectory(src)

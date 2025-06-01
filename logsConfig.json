@@ -1,4 +1,7 @@
 {
+  "CPU": {
+    "active": true
+  },
   "ROM": {
     "active": false,
     "start": 0,
@@ -8,5 +11,14 @@
     "active": true,
     "start": 0,
     "end": 256
+  },
+  "IO": {
+    "active": true
+  },
+  "Clock": {
+    "active": true
+  },
+  "Exceptions": {
+    "active": true
   }
 }

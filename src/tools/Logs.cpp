@@ -18,40 +18,37 @@ extern W65C22 IO;
 extern CrystalOscillator Clock;
 extern std::vector<EmulatorException> EmulatorExceptions;
 
-void Logs::all() {
+void Logs::log() {
     std::string content = "";
+    static nlohmann::json config;
 
-    content += CPU.toStringMD();
-    content += RAM.toStringMD(0, 0xFF);
-    content += ROM.toStringMD(0x7000, 0x70FA);
-    content += IO.toStringMD();
-    content += Clock.toStringMD();
-    content += exceptions();
+    // Load logs config file
+    try {
+        static std::ifstream f("./logsConfig.json");
+        config = nlohmann::json::parse(f);
+    } catch (std::exception e) {
+        content += "logsConfig.json could not be loaded!";
+        createFile(content);
+        return;
+    }
 
-    createFile(content);
-}
-void Logs::component(Component component) {
-    std::string content = "";
-
-    switch (component) {
-        case e_CPU:
-            content += CPU.toStringMD();
-            break;
-        case e_RAM:
-            content += RAM.toStringMD(0, 0xFF);
-            break;
-        case e_ROM:
-            content += ROM.toStringMD(0, 0xFF);
-            break;
-        case e_IO:
-            content += IO.toStringMD();
-            break;
-        case e_Clock:
-            content += Clock.toStringMD();
-            break;
-        default:
-            content += "This not a component or it is not available in logs.";
-            break;
+    try {
+        if (config["CPU"]["active"]) content += CPU.toStringMD();
+        if (config["RAM"]["active"]) {
+            content += RAM.toStringMD(config["RAM"]["start"], config["RAM"]["end"]);
+        }
+        if (config["ROM"]["active"]) {
+            content += ROM.toStringMD(config["ROM"]["start"], config["ROM"]["end"]);
+        }
+        if (config["IO"]["active"]) content += IO.toStringMD();
+        if (config["Clock"]["active"]) content += Clock.toStringMD();
+        if (config["Exceptions"]["active"]) content += exceptions();
+    } catch (std::exception e) {
+        content +=
+            "Error occurred during log file creation, please check the logsConfig.json for syntax "
+            "errors!\n";
+        createFile(content);
+        return;
     }
 
     createFile(content);

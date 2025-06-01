@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 
     // Create logs on termination
     if (arguments.logs) {
-        Logs::all();
+        Logs::log();
     }
 
     // Debug
