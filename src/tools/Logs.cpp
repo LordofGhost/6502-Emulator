@@ -4,8 +4,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "../components/AS6C62256.h"
-#include "../components/AT28C256.h"
+#include "../components/memory/AS6C62256.h"
+#include "../components/memory/AT28C256.h"
 #include "../components/CrystalOscillator.h"
 #include "../components/W65C02.h"
 #include "../components/W65C22.h"
@@ -21,8 +21,8 @@ void Logs::all() {
     std::string content = "";
 
     content += CPU.toStringMD();
-    content += RAM.toStringMD();
-    // content += ROM.toStringMD();
+    content += RAM.toStringMD(0, 0xFF);
+    content += ROM.toStringMD(0x7000, 0x70FA);
     content += IO.toStringMD();
     content += Clock.toStringMD();
     content += exceptions();
@@ -37,10 +37,10 @@ void Logs::component(Component component) {
             content += CPU.toStringMD();
             break;
         case e_RAM:
-            content += RAM.toStringMD();
+            content += RAM.toStringMD(0, 0xFF);
             break;
         case e_ROM:
-            content += ROM.toStringMD();
+            content += ROM.toStringMD(0, 0xFF);
             break;
         case e_IO:
             content += IO.toStringMD();

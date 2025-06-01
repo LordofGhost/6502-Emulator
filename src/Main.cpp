@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "components/AS6C62256.h"
-#include "components/AT28C256.h"
+#include "components/memory/AS6C62256.h"
+#include "components/memory/AT28C256.h"
 #include "components/CrystalOscillator.h"
 #include "components/W65C02.h"
 #include "components/W65C22.h"

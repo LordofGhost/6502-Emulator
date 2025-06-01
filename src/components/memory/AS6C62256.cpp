@@ -1,8 +1,7 @@
 #include "AS6C62256.h"
 
-#include "../exceptions/EmulatorException.h"
-#include "../tools/Convert.h"
-#include "W65C02.h"
+#include "../../exceptions/EmulatorException.h"
+#include "../W65C02.h"
 
 extern W65C02 CPU;
 
@@ -32,24 +31,12 @@ void AS6C62256::write() const {
     memory_ptr[CPU.bus.getAddress()] = CPU.bus.getData();
 }
 
-std::string AS6C62256::dump(Word begin, Word end) const {
-    if (begin >= size || end >= size || begin > end)
-        throw EmulatorException(e_RAM, e_WARNING, 30, "Invalid range arguments");
-
-    char result[(end - begin) * 3 + 1];  // 3 letters are needed to display one byte
-    int resultIndex = 0;
-
-    for (Word index = begin; index <= end; index++) {
-        // Convert 4 bit number to hex value
-        result[resultIndex++] = Convert::binToHex((memory_ptr[index] & 0b11110000) >> 4);
-        result[resultIndex++] = Convert::binToHex(memory_ptr[index] & 0b00001111);
-        result[resultIndex++] = resultIndex % 59 == 0 ? '\n' : ' ';
-    }
-
-    result[resultIndex++] = 0;
-
-    return result;
+std::string AS6C62256::toStringMD(Word begin, Word end) const noexcept {
+    // TODO
+    return "# RAM\n" + dumpMD(begin, end);
 }
-std::string AS6C62256::toString() const {
-    return "-- RAM --\n" + dump() + "---------\n";
+std::string AS6C62256::toString(Word begin, Word end) const noexcept {
+    return "-- RAM --"
+           // TODO
+           + dump(begin, end) + "---------";
 }

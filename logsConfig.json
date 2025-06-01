@@ -1,0 +1,12 @@
+{
+  "ROM": {
+    "active": false,
+    "start": 0,
+    "end": 256
+  },
+  "RAM": {
+    "active": true,
+    "start": 0,
+    "end": 256
+  }
+}
