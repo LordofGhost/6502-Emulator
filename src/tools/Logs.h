@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "../Main.h"
-
 class Logs {
    public:
     void static log();

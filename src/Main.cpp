@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-#include "components/memory/AS6C62256.h"
-#include "components/memory/AT28C256.h"
 #include "components/CrystalOscillator.h"
 #include "components/W65C02.h"
 #include "components/W65C22.h"
+#include "components/memory/AS6C62256.h"
+#include "components/memory/AT28C256.h"
 #include "exceptions/EmulatorException.h"
 #include "tools/Logs.h"
 
@@ -20,13 +20,9 @@ CrystalOscillator Clock;
 // Create exception vector
 std::vector<EmulatorException> EmulatorExceptions;
 
-int main(int argc, char* argv[]) {
-    struct {
-        std::string programPath;
-        bool help = false;
-        bool logs = false;
-    } arguments;
+Arguments arguments;
 
+int main(int argc, char* argv[]) {
     // Check if there are any additional arguments
     if (argc > 1) {
         // Check the additional arguments
@@ -40,7 +36,8 @@ int main(int argc, char* argv[]) {
             }
 
             // Check for logs flag
-            if (!strcmp(argv[i], "-l") || !strcasecmp(argv[i], "--log")) arguments.logs = true;
+            if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "--log")) arguments.logs = true;
+            if (!strcmp(argv[i], "-L") || !strcmp(argv[i], "--LOG")) arguments.logsAll = true;
         }
     }
 
@@ -52,6 +49,7 @@ int main(int argc, char* argv[]) {
                      "\t-h --help\t\t\tDisplays help with available flags and value parameters.\n"
                      "\t-p --path\t\t\tSpecifies the path to the ROM file.\n"
                      "\t-l --log\t\t\tCreate log file when process terminates."
+                     "\t-L --LOG\t\t\tCreate log file on every CPU execution."
                      ""
                   << std::endl;
         return 0;

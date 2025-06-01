@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
 
@@ -18,18 +19,21 @@ extern W65C22 IO;
 extern CrystalOscillator Clock;
 extern std::vector<EmulatorException> EmulatorExceptions;
 
+static nlohmann::json config;
+
 void Logs::log() {
-    std::string content = "";
-    static nlohmann::json config;
+    std::string content;
 
     // Load logs config file
-    try {
-        static std::ifstream f("./logsConfig.json");
-        config = nlohmann::json::parse(f);
-    } catch (std::exception e) {
-        content += "logsConfig.json could not be loaded!";
-        createFile(content);
-        return;
+    if (config.empty()) {
+        try {
+            static std::ifstream f("./logsConfig.json");
+            config = nlohmann::json::parse(f);
+        } catch ([[maybe_unused]] std::exception &e) {
+            content += "logsConfig.json could not be loaded!";
+            createFile(content);
+            return;
+        }
     }
 
     try {
@@ -43,7 +47,7 @@ void Logs::log() {
         if (config["IO"]["active"]) content += IO.toStringMD();
         if (config["Clock"]["active"]) content += Clock.toStringMD();
         if (config["Exceptions"]["active"]) content += exceptions();
-    } catch (std::exception e) {
+    } catch ([[maybe_unused]] std::exception &e) {
         content +=
             "Error occurred during log file creation, please check the logsConfig.json for syntax "
             "errors!\n";
@@ -57,19 +61,19 @@ void Logs::log() {
 std::string Logs::exceptions() {
     std::string content = "# Exceptions\n\n";
 
-    for (EmulatorException exception : EmulatorExceptions) content += exception.toStringMD();
+    for (const EmulatorException &exception : EmulatorExceptions) content += exception.toStringMD();
 
     return content;
 }
 
 std::string Logs::getFileName() {
-    auto now = std::chrono::system_clock::now();
-    std::time_t time = std::chrono::system_clock::to_time_t(now);
-    std::tm* localTime = std::localtime(&time);
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t time = std::chrono::system_clock::to_time_t(now);
+    const std::tm* localTime = std::localtime(&time);
 
     std::ostringstream oss;
-    oss << std::put_time(localTime, "T:%H_%M_%S_D:%Y-%m-%d");
-    return "C:" + std::to_string(Clock.getCycles()) + "_" + oss.str() + ".md";
+    oss << std::put_time(localTime, "%H:%M:%S:_%Y:%m:%d");
+    return std::to_string(Clock.getCycles()) + "_" + oss.str() + ".md";
 }
 
 void Logs::createFile(const std::string& content) {
@@ -83,8 +87,8 @@ void Logs::createFile(const std::string& content) {
     if (std::ofstream file(folder.string() + fileName.string()); file.is_open()) {
         file << content << std::endl;
         file.close();
+        std::cout << "Log file" << std::endl;
     } else {
-        // TODO
-        throw 1;
+        std::cerr << "Log file could not be created!" << std::endl;
     }
 }
