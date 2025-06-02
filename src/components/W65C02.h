@@ -36,7 +36,7 @@ class W65C02 {
         [[nodiscard]] Byte getData() const { return dataBus; }
         void setData(const Byte& data) {
             if (CPU.registers.RW == false)
-                throw EmulatorException(e_ROM, e_CRITICAL, 2,
+                throw EmulatorException(e_CPU, e_CRITICAL, 1200,
                                         "Cannot write to databus, because RW is set to false.");
             dataBus = data;
         };

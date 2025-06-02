@@ -32,7 +32,7 @@ void W65C02::reset() noexcept {
             if (decodeLogic.count(bus.getData()))
                 nextCall = decodeLogic.at(bus.getData());
             else
-                throw EmulatorException(e_CPU, e_CRITICAL, 50, "Op code does not exist.");
+                throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
 
             // Execute
             nextCall();
