@@ -3,7 +3,7 @@ project(Emulator LANGUAGES C CXX)
 
 include(FetchContent)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v -g3 -fno-omit-frame-pointer")

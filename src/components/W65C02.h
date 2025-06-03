@@ -1,6 +1,8 @@
 #ifndef W65C02_H
 #define W65C02_H
 
+#include <format>
+#include <functional>
 #include <map>
 
 #include "../Main.h"
@@ -46,11 +48,13 @@ class W65C02 {
 
         std::string toStringMD() const {
             return "## Bus\n"
-                   "| Bus | Value (dec) |\n"
-                   "|-----|-------------|\n"
+                   "| Bus | Value (bin) | Value (dec) | Value (hex) |\n"
+                   "|-----|-------------|-------------|-------------|\n"
                    "| Data | " +
-                   std::to_string(dataBus) + " |\n" + "| Address | " + std::to_string(addressBus) +
-                   " |\n";
+                   std::format("{:B}", dataBus) + " | " + std::to_string( dataBus) + " | " +
+                   std::format("{:X}", dataBus) + " |\n" + "| Address | " +
+                   std::format("{:B}", addressBus) + " | " + std::to_string( addressBus) + " | " +
+                   std::format("{:X}", addressBus) + " |\n";
         }
     } bus;
     // make RW flag visible to memory
@@ -84,14 +88,15 @@ class W65C02 {
 
             std::string toStringMD() const {
                 return "### Processor flags\n"
-                       "| Register | Value (dec) |\n"
+                       "| Register | Value (bin) |\n"
                        "|----------|-------------|\n"
                        "| N (Negative) | " +
-                       std::to_string(N) + " |\n" + "| V (Overflow) | " + std::to_string(V) +
-                       " |\n" + "| B (Break) | " + std::to_string(B) + " |\n" + "| D (Decimal) | " +
-                       std::to_string(D) + " |\n" + "| I (Interrupt Disable) | " +
-                       std::to_string(I) + " |\n" + "| Z (Zero) | " + std::to_string(Z) + " |\n" +
-                       "| C (Carry) |" + std::to_string(C) + " |\n";
+                       std::format("{:B}", N) + " |\n" + "| V (Overflow) | " +
+                       std::format("{:B}", V) + " |\n" + "| B (Break) | " + std::format("{:B}", B) +
+                       " |\n" + "| D (Decimal) | " + std::format("{:B}", D) + " |\n" +
+                       "| I (Interrupt Disable) | " + std::format("{:B}", I) + " |\n" +
+                       "| Z (Zero) | " + std::format("{:B}", Z) + " |\n" + "| C (Carry) |" +
+                       std::format("{:B}", C) + " |\n";
             }
         } P;
 
@@ -102,13 +107,20 @@ class W65C02 {
 
         std::string toStringMD() const {
             return "## Registers\n"
-                   "| Register | Value |\n"
-                   "|----------|-------|\n"
+                   "| Register | Value (bin) | Value (dec) | Value (hex)|\n"
+                   "|----------|-------------|-------------|------------|\n"
                    "| A (Accumulator) | " +
-                   std::to_string(A) + " |\n" + "| X (X index) | " + std::to_string(X) + " |\n" +
-                   "| Y (Y index) | " + std::to_string(Y) + " |\n" + "| S (Stack pointer) |" +
-                   std::to_string(S) + " |\n" + "| PC (Program Counter) | " + std::to_string(PC) +
-                   " |\n" + "| RW (Read/Write) | " + std::to_string(RW) + " |\n" + P.toStringMD();
+                   std::format("{:B}", A) + " | " + std::to_string( A) + " | " +
+                   std::format("{:X}", A) + " |\n" + "| X (X index) | " + std::format("{:B}", X) +
+                   " | " + std::to_string( X) + " | " + std::format("{:X}", X) + " |\n" +
+                   "| Y (Y index) | " + std::format("{:B}", Y) + " | " + std::to_string( Y) +
+                   " | " + std::format("{:X}", Y) + " |\n" + "| S (Stack pointer) |" +
+                   std::format("{:B}", S) + " | " + std::to_string( S) + " | " +
+                   std::format("{:X}", S) + " |\n" + "| PC (Program Counter) | " +
+                   std::format("{:B}", PC) + " | " + std::to_string( PC) + " | " +
+                   std::format("{:X}", PC) + " |\n" + "| RW (Read/Write) | " +
+                   std::format("{:B}", RW) + " | " + std::to_string( RW) + " | " +
+                   std::format("{:X}", RW) + " |\n" + P.toStringMD();
         }
 
        private:
