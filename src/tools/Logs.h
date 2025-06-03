@@ -6,10 +6,10 @@
 class Logs {
    public:
     void static log();
+    std::string static folderName();
 
    private:
     std::string static exceptions();
-    std::string static getFileName();
     void static createFile(const std::string &content);
 };
 

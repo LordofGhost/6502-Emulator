@@ -20,6 +20,7 @@ extern CrystalOscillator Clock;
 extern std::vector<EmulatorException> EmulatorExceptions;
 
 static nlohmann::json config;
+static std::string logFolderName = Logs::folderName();
 
 void Logs::log() {
     std::string content;
@@ -58,6 +59,16 @@ void Logs::log() {
     createFile(content);
 }
 
+std::string Logs::folderName() {
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t time = std::chrono::system_clock::to_time_t(now);
+    const std::tm *localTime = std::localtime(&time);
+
+    std::ostringstream oss;
+    oss << std::put_time(localTime, "%Y:%m:%d_%H:%M:%S");
+    return oss.str();
+}
+
 std::string Logs::exceptions() {
     std::string content = "# Exceptions\n\n";
 
@@ -66,25 +77,18 @@ std::string Logs::exceptions() {
     return content;
 }
 
-std::string Logs::getFileName() {
-    const auto now = std::chrono::system_clock::now();
-    const std::time_t time = std::chrono::system_clock::to_time_t(now);
-    const std::tm* localTime = std::localtime(&time);
 
-    std::ostringstream oss;
-    oss << std::put_time(localTime, "%H:%M:%S:_%Y:%m:%d");
-    return std::to_string(Clock.getCycles()) + "_" + oss.str() + ".md";
-}
-
-void Logs::createFile(const std::string& content) {
-    const std::filesystem::path folder = "./logs/";
-    const std::filesystem::path fileName = getFileName();
+void Logs::createFile(const std::string &content) {
+    const std::filesystem::path folder = "./logs/" + logFolderName;
+    const std::filesystem::path fileName = std::to_string(Clock.getCycles()) + ".md";
 
     // Check if logs folder exists
+    if (!std::filesystem::exists("./logs/")) std::filesystem::create_directory("./logs/");
+    // Check if current logs folder exists
     if (!std::filesystem::exists(folder)) std::filesystem::create_directory(folder);
 
     // Open file
-    if (std::ofstream file(folder.string() + fileName.string()); file.is_open()) {
+    if (std::ofstream file(folder.string() + '/' + fileName.string()); file.is_open()) {
         file << content << std::endl;
         file.close();
         std::cout << "Log file" << std::endl;
