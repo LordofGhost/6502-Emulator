@@ -2,20 +2,12 @@
 
 #include <iostream>
 
-#include "../clock/CrystalOscillator.h"
-#include "../memory/AT28C256.h"
-
-extern AT28C256 ROM;
-extern CrystalOscillator Clock;
-
 void W65C02::reset() noexcept {
     b_stop = false;
     std::function<void()> nextCall;
 
-    Clock.reset();
     // Reset cycle
     registers.PC = 0xFFFC;  // $FFFC, $FFFD Reset vector
-    Clock.trigger();
 
     // CPU loop
     while (!b_stop) {
@@ -41,6 +33,10 @@ void W65C02::reset() noexcept {
 }
 
 void W65C02::Instructions::I_00() { CPU.registers.P.I = true; }
+
+void W65C02::onClockCycle(Phase phase) {
+    // TODO
+}
 
 std::string W65C02::toStringMD() const {
     return "# CPU\n" + bus.toStringMD() + registers.toStringMD();
