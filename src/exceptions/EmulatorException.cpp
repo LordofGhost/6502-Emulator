@@ -4,7 +4,7 @@
 
 extern std::vector<EmulatorException> EmulatorExceptions;
 
-EmulatorException::EmulatorException(Component component, Exception_t type, unsigned int code,
+EmulatorException::EmulatorException(e_Component component, Exception_t type, unsigned int code,
                                      const char* description) noexcept {
     this->component = component;
     this->type = type;

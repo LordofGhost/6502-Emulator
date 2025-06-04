@@ -6,7 +6,7 @@
 
 #include <string>
 
-enum Component { e_CPU, e_RAM, e_ROM, e_IO, e_Clock };
+enum e_Component { e_CPU, e_RAM, e_ROM, e_IO, e_Clock };
 
 struct Arguments {
     std::string programPath;
