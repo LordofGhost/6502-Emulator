@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "components/CrystalOscillator.h"
+#include "components/clock/CrystalOscillator.h"
 #include "components/W65C02.h"
 #include "components/W65C22.h"
 #include "components/memory/AS6C62256.h"
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     // Load ROM
     try {
         ROM.load(arguments.programPath);
-    } catch (EmulatorException e) {
+    } catch (EmulatorException &e) {
         std::cout << e.toString() << std::endl;
     }
 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     CPU.reset();
 
     // Create logs on termination
-    if (arguments.logs) {
+    if (arguments.logs && !arguments.logsAll) {
         Logs::log();
     }
 

@@ -4,3 +4,4 @@ add_library(components
 )
 
 add_subdirectory(memory)
+add_subdirectory(clock)

@@ -7,6 +7,7 @@ class Logs {
    public:
     void static log();
     std::string static folderName();
+    static bool getClockHistoryConfig();
 
    private:
     std::string static exceptions();

@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 
-#include "../components/CrystalOscillator.h"
+#include "../components/clock/CrystalOscillator.h"
 #include "../components/W65C02.h"
 #include "../components/W65C22.h"
 #include "../components/memory/AS6C62256.h"
@@ -68,6 +68,9 @@ std::string Logs::folderName() {
     oss << std::put_time(localTime, "%Y:%m:%d_%H:%M:%S");
     return oss.str();
 }
+bool Logs::getClockHistoryConfig() {
+    return config["Clock"]["history"];
+}
 
 std::string Logs::exceptions() {
     std::string content = "# Exceptions\n\n";
@@ -80,7 +83,7 @@ std::string Logs::exceptions() {
 
 void Logs::createFile(const std::string &content) {
     const std::filesystem::path folder = "./logs/" + logFolderName;
-    const std::filesystem::path fileName = std::to_string(Clock.getCycles()) + ".md";
+    const std::filesystem::path fileName = std::to_string(Clock.getCycleCount()) + ".md";
 
     // Check if logs folder exists
     if (!std::filesystem::exists("./logs/")) std::filesystem::create_directory("./logs/");

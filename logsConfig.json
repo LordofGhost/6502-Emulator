@@ -16,7 +16,8 @@
     "active": true
   },
   "Clock": {
-    "active": true
+    "active": true,
+    "history": true
   },
   "Exceptions": {
     "active": true
