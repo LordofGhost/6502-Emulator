@@ -21,6 +21,8 @@ extern std::vector<EmulatorException> EmulatorExceptions;
 
 static nlohmann::json config;
 static std::string logFolderName = Logs::folderName();
+// This variable keeps track of the count of created log files
+static int createdFiles = 0;
 
 void Logs::log() {
     std::string content;
@@ -82,6 +84,9 @@ std::string Logs::exceptions() {
 
 
 void Logs::createFile(const std::string &content) {
+    // Prevent from creating to many files
+    if (createdFiles > 100) return;
+
     const std::filesystem::path folder = "./logs/" + logFolderName;
     const std::filesystem::path fileName = std::to_string(Clock.getCycleCount()) + ".md";
 
@@ -92,6 +97,7 @@ void Logs::createFile(const std::string &content) {
 
     // Open file
     if (std::ofstream file(folder.string() + '/' + fileName.string()); file.is_open()) {
+        createdFiles++;
         file << content << std::endl;
         file.close();
     } else {

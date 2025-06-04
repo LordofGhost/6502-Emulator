@@ -49,7 +49,8 @@ int main(int argc, char* argv[]) {
                      "\t-h --help\t\t\tDisplays help with available flags and value parameters.\n"
                      "\t-p --path\t\t\tSpecifies the path to the ROM file.\n"
                      "\t-l --log\t\t\tCreate log file when process terminates."
-                     "\t-L --LOG\t\t\tCreate log file on every CPU execution."
+                     "\t-L --LOG\t\t\tCreate log file on every clock cycle. Note the limit for log "
+                     "files per run is 100."
                      ""
                   << std::endl;
         return 0;
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]) {
     // Load ROM
     try {
         ROM.load(arguments.programPath);
-    } catch (EmulatorException &e) {
+    } catch (EmulatorException& e) {
         std::cout << e.toString() << std::endl;
     }
 
