@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 
+#include "../components/Bus.h"
 #include "../components/clock/CrystalOscillator.h"
 #include "../components/cpu/W65C02.h"
 #include "../components/io/W65C22.h"
@@ -17,6 +18,7 @@ extern AS6C62256 RAM;
 extern AT28C256 ROM;
 extern W65C22 IO;
 extern CrystalOscillator Clock;
+extern Bus bus;
 extern std::vector<EmulatorException> EmulatorExceptions;
 
 // Logging configuration
@@ -43,7 +45,9 @@ void Logs::log() {
         }
     }
 
-    if (arguments.logsAll && (Clock.getCycleCount() < config["startCycle"] || Clock.getCycleCount() > config["stopCycle"])) return;
+    if (arguments.logsAll && (Clock.getCycleCount() < config["startCycle"] ||
+                              Clock.getCycleCount() > config["stopCycle"]))
+        return;
 
     try {
         if (config["CPU"]["active"]) content += CPU.toStringMD();
@@ -54,6 +58,7 @@ void Logs::log() {
             content += ROM.toStringMD(config["ROM"]["start"], config["ROM"]["end"]);
         }
         if (config["IO"]["active"]) content += IO.toStringMD();
+        if (config["Bus"]["active"]) content += bus.toStringMD();
         if (config["Clock"]["active"]) content += Clock.toStringMD();
         if (config["Exceptions"]["active"]) content += exceptions();
     } catch ([[maybe_unused]] std::exception &e) {

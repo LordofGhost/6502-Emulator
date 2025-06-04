@@ -1,9 +1,9 @@
 #include "AS6C62256.h"
 
 #include "../../exceptions/EmulatorException.h"
-#include "../cpu/W65C02.h"
+#include "../Bus.h"
 
-extern W65C02 CPU;
+extern Bus bus;
 
 void AS6C62256::reset() {
     delete[] memory_ptr;
@@ -12,25 +12,25 @@ void AS6C62256::reset() {
 
 void AS6C62256::read() const {
     // Due to addressing restrictions, only half of the RAM can be used.
-    if (CPU.bus.getAddress() > 0x4000)
+    if (bus.getAddress() > 0x4000)
         throw EmulatorException(
             e_RAM, e_CRITICAL, 2200,
             "Address not inside RAM, higher than 0x4000. While trying to read from RAM.");
 
-    CPU.bus.setData(memory_ptr[CPU.bus.getAddress()]);
+    bus.setData(memory_ptr[bus.getAddress()]);
 }
 
 void AS6C62256::write() const {
-    if (CPU.bus.getAddress() > 0x4000)
+    if (bus.getAddress() > 0x4000)
         throw EmulatorException(
             e_RAM, e_CRITICAL, 2201,
             "Address not inside RAM, higher than 0x4000. While trying to write to RAM.");
 
-    if (CPU.getRW() == true)
-        throw EmulatorException(e_RAM, e_CRITICAL, 2000,
-                                "Cannot write to RAM, because RW is set to read.");
+    memory_ptr[bus.getAddress()] = bus.getData();
+}
 
-    memory_ptr[CPU.bus.getAddress()] = CPU.bus.getData();
+void AS6C62256::onClockCycle(Phase phase) {
+    // TODO
 }
 
 std::string AS6C62256::toStringMD(Word begin, Word end) const noexcept {

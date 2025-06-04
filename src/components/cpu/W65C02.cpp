@@ -2,6 +2,10 @@
 
 #include <iostream>
 
+#include "../Bus.h"
+
+extern Bus bus;
+
 void W65C02::reset() noexcept {
     b_stop = false;
     std::function<void()> nextCall;
@@ -15,7 +19,8 @@ void W65C02::reset() noexcept {
             // Fetch
             registers.RW = true;
             bus.setAddress(registers.PC);
-            ROM.read();
+            // TODO
+            //ROM.read();
 
             // Decode & Check if op code exists
             if (decodeLogic.count(bus.getData()))
@@ -39,5 +44,5 @@ void W65C02::onClockCycle(Phase phase) {
 }
 
 std::string W65C02::toStringMD() const {
-    return "# CPU\n" + bus.toStringMD() + registers.toStringMD();
+    return "# CPU\n" + registers.toStringMD();
 }

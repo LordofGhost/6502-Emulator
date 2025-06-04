@@ -3,9 +3,9 @@
 #include <fstream>
 
 #include "../../exceptions/EmulatorException.h"
-#include "../cpu/W65C02.h"
+#include "../Bus.h"
 
-extern W65C02 CPU;
+extern Bus bus;
 
 void AT28C256::load(const std::filesystem::path& file) const {
     // Check if file exists
@@ -35,15 +35,20 @@ void AT28C256::load(const std::filesystem::path& file) const {
 }
 
 void AT28C256::read() const {
-    if (CPU.bus.getAddress() < 0x8000)
-        throw EmulatorException(e_ROM, e_CRITICAL, 3400, "Address not inside ROM, lower than 0x8000.");
-    if (CPU.bus.getAddress() > 0xFFFF)
+    if (bus.getAddress() < 0x8000)
+        throw EmulatorException(e_ROM, e_CRITICAL, 3400,
+                                "Address not inside ROM, lower than 0x8000.");
+    if (bus.getAddress() > 0xFFFF)
         throw EmulatorException(e_ROM, e_CRITICAL, 3401,
                                 "Address not inside ROM, higher than 0xFFFF.");
 
-    Word address = CPU.bus.getAddress() - 0x8000;  // ROM goes from 0x8000 to 0xFFFF
+    Word address = bus.getAddress() - 0x8000;  // ROM goes from 0x8000 to 0xFFFF
 
-    CPU.bus.setData(this->memory_ptr[address]);
+    bus.setData(this->memory_ptr[address]);
+}
+
+void AT28C256::onClockCycle(Phase phase) {
+    // TODO
 }
 
 std::string AT28C256::toStringMD(Word begin, Word end) const noexcept {

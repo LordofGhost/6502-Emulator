@@ -6,16 +6,16 @@
 #include <map>
 
 #include "../../Main.h"
-#include "../../exceptions/EmulatorException.h"
+#include "../Component.h"
 
 /* CPU
  * Diagram: https://davidmjc.github.io/6502/bd.svg
  * Datasheet: https://eater.net/datasheets/w65c02s.pdf
  */
 
-class W65C02 {
+class W65C02 : public Component {
    public:
-    W65C02() : bus(*this), registers(*this), instructions(*this) {
+    W65C02() : registers(*this), instructions(*this) {
         // All these methods are already implemented
         // decodeLogic[0x00] = [this]() -> void { return instructions.I_00(); };
     }
@@ -26,38 +26,6 @@ class W65C02 {
     // This methode stops the CPU from executing
     void stop() { b_stop = true; }
 
-    struct s_Bus {
-       private:
-        Byte dataBus = 0;
-        Word addressBus = 0;
-        W65C02& CPU;
-
-       public:
-        // This reference is needed to be able to access non-static members of W65C02
-        explicit s_Bus(W65C02& parentRef) : CPU(parentRef) {}
-
-        [[nodiscard]] Byte getData() const { return dataBus; }
-        void setData(const Byte& data) {
-            if (CPU.registers.RW == false)
-                throw EmulatorException(e_CPU, e_CRITICAL, 1200,
-                                        "Cannot write to databus, because RW is set to false.");
-            dataBus = data;
-        };
-
-        [[nodiscard]] Word getAddress() const { return addressBus; }
-        void setAddress(const Word& address) { addressBus = address; }
-
-        std::string toStringMD() const {
-            return "## Bus\n"
-                   "| Bus | Value (bin) | Value (dec) | Value (hex) |\n"
-                   "|-----|-------------|-------------|-------------|\n"
-                   "| Data | " +
-                   std::format("{:B}", dataBus) + " | " + std::to_string( dataBus) + " | " +
-                   std::format("{:X}", dataBus) + " |\n" + "| Address | " +
-                   std::format("{:B}", addressBus) + " | " + std::to_string( addressBus) + " | " +
-                   std::format("{:X}", addressBus) + " |\n";
-        }
-    } bus;
     // make RW flag visible to memory
     [[nodiscard]] bool getRW() const { return registers.RW; }  // make RW flag visible to memory
 
@@ -111,16 +79,16 @@ class W65C02 {
                    "| Register | Value (bin) | Value (dec) | Value (hex)|\n"
                    "|----------|-------------|-------------|------------|\n"
                    "| A (Accumulator) | " +
-                   std::format("{:B}", A) + " | " + std::to_string( A) + " | " +
+                   std::format("{:B}", A) + " | " + std::to_string(A) + " | " +
                    std::format("{:X}", A) + " |\n" + "| X (X index) | " + std::format("{:B}", X) +
-                   " | " + std::to_string( X) + " | " + std::format("{:X}", X) + " |\n" +
-                   "| Y (Y index) | " + std::format("{:B}", Y) + " | " + std::to_string( Y) +
-                   " | " + std::format("{:X}", Y) + " |\n" + "| S (Stack pointer) |" +
-                   std::format("{:B}", S) + " | " + std::to_string( S) + " | " +
+                   " | " + std::to_string(X) + " | " + std::format("{:X}", X) + " |\n" +
+                   "| Y (Y index) | " + std::format("{:B}", Y) + " | " + std::to_string(Y) + " | " +
+                   std::format("{:X}", Y) + " |\n" + "| S (Stack pointer) |" +
+                   std::format("{:B}", S) + " | " + std::to_string(S) + " | " +
                    std::format("{:X}", S) + " |\n" + "| PC (Program Counter) | " +
-                   std::format("{:B}", PC) + " | " + std::to_string( PC) + " | " +
+                   std::format("{:B}", PC) + " | " + std::to_string(PC) + " | " +
                    std::format("{:X}", PC) + " |\n" + "| RW (Read/Write) | " +
-                   std::format("{:B}", RW) + " | " + std::to_string( RW) + " | " +
+                   std::format("{:B}", RW) + " | " + std::to_string(RW) + " | " +
                    std::format("{:X}", RW) + " |\n" + P.toStringMD();
         }
 
@@ -415,6 +383,7 @@ class W65C02 {
     } instructions;
 
    public:
+    void onClockCycle(Phase phase) override;
     std::string toStringMD() const;
 };
 
