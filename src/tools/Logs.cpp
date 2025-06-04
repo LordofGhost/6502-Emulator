@@ -19,10 +19,14 @@ extern W65C22 IO;
 extern CrystalOscillator Clock;
 extern std::vector<EmulatorException> EmulatorExceptions;
 
+// Logging configuration
 static nlohmann::json config;
+// The log folder name of the current run (date, time)
 static std::string logFolderName = Logs::folderName();
 // This variable keeps track of the count of created log files
 static int createdFiles = 0;
+
+extern Arguments arguments;
 
 void Logs::log() {
     std::string content;
@@ -39,6 +43,8 @@ void Logs::log() {
         }
     }
 
+    if (arguments.logsAll && (Clock.getCycleCount() < config["startCycle"] || Clock.getCycleCount() > config["stopCycle"])) return;
+
     try {
         if (config["CPU"]["active"]) content += CPU.toStringMD();
         if (config["RAM"]["active"]) {
@@ -52,7 +58,8 @@ void Logs::log() {
         if (config["Exceptions"]["active"]) content += exceptions();
     } catch ([[maybe_unused]] std::exception &e) {
         content +=
-            "Error occurred during log file creation, please check the logsConfig.json for syntax "
+            "Error occurred during log file creation, please check the logsConfig.json for "
+            "syntax "
             "errors!\n";
         createFile(content);
         return;
@@ -70,9 +77,8 @@ std::string Logs::folderName() {
     oss << std::put_time(localTime, "%Y:%m:%d_%H:%M:%S");
     return oss.str();
 }
-bool Logs::getClockHistoryConfig() {
-    return config["Clock"]["history"];
-}
+
+bool Logs::getClockHistoryConfig() { return config["Clock"]["history"]; }
 
 std::string Logs::exceptions() {
     std::string content = "# Exceptions\n\n";
@@ -82,10 +88,9 @@ std::string Logs::exceptions() {
     return content;
 }
 
-
 void Logs::createFile(const std::string &content) {
     // Prevent from creating to many files
-    if (createdFiles > 100) return;
+    if (createdFiles >= 100) return;
 
     const std::filesystem::path folder = "./logs/" + logFolderName;
     const std::filesystem::path fileName = std::to_string(Clock.getCycleCount()) + ".md";

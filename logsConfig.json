@@ -1,4 +1,6 @@
 {
+  "startCycle": 10,
+  "stopCycle": 50,
   "CPU": {
     "active": true
   },
