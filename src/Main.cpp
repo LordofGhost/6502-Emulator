@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "components/Bus.h"
 #include "components/clock/CrystalOscillator.h"
 #include "components/cpu/W65C02.h"
 #include "components/io/W65C22.h"
@@ -15,7 +16,12 @@ W65C02 CPU;
 AS6C62256 RAM;
 AT28C256 ROM;
 W65C22 IO;
+
+constexpr std::array<Component*, 4> components = {&CPU, &RAM, &ROM, &IO};
+
+// Other parts of the emulator (uppercase because clock is already declared in _time.h)
 CrystalOscillator Clock;
+Bus bus;
 
 // Create exception vector
 std::vector<EmulatorException> EmulatorExceptions;
@@ -63,8 +69,8 @@ int main(int argc, char* argv[]) {
         std::cout << e.toString() << std::endl;
     }
 
-    // Start CPU
-    CPU.reset();
+    // Start the Clock (entry Point)
+    Clock.start();
 
     // Create logs on termination
     if (arguments.logs && !arguments.logsAll) {
