@@ -1,29 +1,51 @@
 #include "CrystalOscillator.h"
 
 #include "../../Main.h"
+#include "../../exceptions/EmulatorException.h"
+#include "../Component.h"
 
+extern const std::array<Component *, 4> components;
 extern Arguments arguments;
+extern std::vector<EmulatorException> EmulatorExceptions;
 
-void CrystalOscillator::start() { cycleStartTime = std::chrono::steady_clock::now(); }
+[[noreturn]] void CrystalOscillator::start() {
+    running = true;
+    while (running) {
+        // Set the cycle start time
+        cycleStartTime = std::chrono::steady_clock::now();
 
-void CrystalOscillator::stop() {
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(now - cycleStartTime).count();
-    cycles.push_back(elapsed);
-    cycleStartTime = std::chrono::steady_clock::now();
+        // Execute one cycle
+        tick();
 
-    // Create logs at the of the cycle
-    if (arguments.logsAll) Logs::log();
+        // Set the cycle end time
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(now - cycleStartTime).count();
+        cycles.push_back(elapsed);
+
+        // Create logs at the of the cycle
+        if (arguments.logsAll) Logs::log();
+
+        running = !checkForStopSignal();
+    }
 }
 
-void CrystalOscillator::trigger() {
-    stop();
-    start();
+void CrystalOscillator::tick() {
+    for (Phase phase = Ph1; phase <= Ph2; phase++) {
+        for (Component *component : components) {
+            component->onClockCycle(phase);
+        }
+    }
+}
+
+bool CrystalOscillator::checkForStopSignal() {
+    if (!EmulatorExceptions.empty()) return true;
+    return false;
 }
 
 void CrystalOscillator::reset() {
     cycles.clear();
+    running = false;
     start();
 }
 
@@ -40,7 +62,7 @@ std::string CrystalOscillator::toStringMD() const {
             "| Cycle | Time (ns) |\n"
             "|-------|-----------|\n";
         for (int index = 0; index < cycles.size(); index++) {
-            content += std::format("| {} | {} |\n", index+1, cycles[index]);
+            content += std::format("| {} | {} |\n", index + 1, cycles[index]);
         }
         return content;
     }

@@ -6,10 +6,18 @@
 
 #include "../../tools/Logs.h"
 
+enum Phase { Ph1 = 1, Ph2 = 2 };
+
+Phase& operator++(Phase& phase, int) {
+    phase = static_cast<Phase>(static_cast<int>(phase) + 1);
+    return phase;
+}
+
 class CrystalOscillator {
     std::chrono::steady_clock::time_point cycleStartTime;
     // This vector stores the time that a cycle took; the index corresponds to the cycle count.
     std::vector<long long> cycles;
+    bool running = false;
 
    public:
     unsigned long getCycleCount() const { return cycles.size(); }
@@ -17,13 +25,16 @@ class CrystalOscillator {
 
     // Start a cycle
     void start();
-    // Stop a cycle and save it inside cycles
-    void stop();
-    // Stop the last cycle and start a new one
-    void trigger();
     // Reset all Clock values
     void reset();
 
+   private:
+    // This methode triggers a clock cycle
+    static void tick();
+    // This methode is used to check if the emulator should be stopped
+    static bool checkForStopSignal();
+
+   public:
     std::string toString() const;
     std::string toStringMD() const;
 };
