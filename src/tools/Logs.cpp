@@ -94,7 +94,6 @@ void Logs::createFile(const std::string &content) {
     if (std::ofstream file(folder.string() + '/' + fileName.string()); file.is_open()) {
         file << content << std::endl;
         file.close();
-        std::cout << "Log file" << std::endl;
     } else {
         std::cerr << "Log file could not be created!" << std::endl;
     }
