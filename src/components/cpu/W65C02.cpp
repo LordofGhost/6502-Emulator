@@ -17,13 +17,6 @@ void W65C02::reset() noexcept {
     registers.PC = 0xFFFC;  // $FFFC, $FFFD Reset vector
     Clock.trigger();
 
-    // TODO
-    int i = 0;
-    while (i < 1000) {
-        Clock.trigger();
-        i++;
-    }
-
     // CPU loop
     while (!b_stop) {
         try {
