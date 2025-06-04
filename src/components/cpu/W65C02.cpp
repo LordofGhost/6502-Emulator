@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../../exceptions/EmulatorException.h"
 #include "../Bus.h"
 
 extern Bus bus;
@@ -20,7 +21,7 @@ void W65C02::reset() noexcept {
             registers.RW = true;
             bus.setAddress(registers.PC);
             // TODO
-            //ROM.read();
+            // ROM.read();
 
             // Decode & Check if op code exists
             if (decodeLogic.count(bus.getData()))
@@ -43,6 +44,4 @@ void W65C02::onClockCycle(Phase phase) {
     // TODO
 }
 
-std::string W65C02::toStringMD() const {
-    return "# CPU\n" + registers.toStringMD();
-}
+std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }

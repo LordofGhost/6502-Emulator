@@ -2,6 +2,9 @@
 
 #include "../../exceptions/EmulatorException.h"
 #include "../Bus.h"
+#include "../cpu/W65C02.h"
+
+extern W65C02 CPU;
 
 extern Bus bus;
 
@@ -30,13 +33,18 @@ void AS6C62256::write() const {
 }
 
 void AS6C62256::onClockCycle(Phase phase) {
-    // TODO
+    // Check if two highest address bits are low
+    if ((bus.getAddress() & 0xC000) == 0 && phase == Ph2) {
+        if (CPU.getRW())
+            read();
+        else
+            write();
+    }
 }
 
 std::string AS6C62256::toStringMD(Word begin, Word end) const noexcept {
     return "# RAM\n" + dumpMD(begin, end);
 }
 std::string AS6C62256::toString(Word begin, Word end) const noexcept {
-    return "-- RAM --"
-           + dump(begin, end) + "---------";
+    return "-- RAM --" + dump(begin, end) + "---------";
 }
