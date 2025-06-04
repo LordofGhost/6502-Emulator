@@ -48,7 +48,10 @@ void AT28C256::read() const {
 }
 
 void AT28C256::onClockCycle(Phase phase) {
-    // TODO
+    // Check if highest address bit is set, which is connected to the CS enable pin
+    if ((bus.getAddress() & 0x8000) == 0 && phase == Ph2) {
+        read();
+    }
 }
 
 std::string AT28C256::toStringMD(Word begin, Word end) const noexcept {

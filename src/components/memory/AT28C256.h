@@ -11,9 +11,10 @@
  */
 
 class AT28C256 final : public Component, Memory {
+    void read() const override;
+
    public:
     void load(const std::filesystem::path& file) const;
-    void read() const override;
     void onClockCycle(Phase phase) override;
     [[nodiscard]] std::string toStringMD(Word begin, Word end) const noexcept override;
     [[nodiscard]] std::string toString(Word begin, Word end) const noexcept override;
