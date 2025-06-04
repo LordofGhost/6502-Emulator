@@ -17,7 +17,7 @@ class Bus {
     void setAddress(const Word& address) { addressBus = address; }
 
     std::string toStringMD() const {
-        return "## Bus\n"
+        return "# Bus\n"
                "| Bus | Value (bin) | Value (dec) | Value (hex) |\n"
                "|-----|-------------|-------------|-------------|\n"
                "| Data | " +
