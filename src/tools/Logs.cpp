@@ -7,8 +7,8 @@
 #include <sstream>
 
 #include "../components/clock/CrystalOscillator.h"
-#include "../components/W65C02.h"
-#include "../components/W65C22.h"
+#include "../components/cpu/W65C02.h"
+#include "../components/io/W65C22.h"
 #include "../components/memory/AS6C62256.h"
 #include "../components/memory/AT28C256.h"
 

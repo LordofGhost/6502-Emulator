@@ -1,7 +1,6 @@
-add_library(components
-        W65C22.cpp
-        W65C02.cpp
-)
+add_library(components)
 
 add_subdirectory(memory)
 add_subdirectory(clock)
+add_subdirectory(io)
+add_subdirectory(cpu)

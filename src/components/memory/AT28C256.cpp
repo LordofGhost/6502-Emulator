@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "../../exceptions/EmulatorException.h"
-#include "../W65C02.h"
+#include "../cpu/W65C02.h"
 
 extern W65C02 CPU;
 

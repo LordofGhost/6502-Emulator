@@ -5,8 +5,8 @@
 #include <functional>
 #include <map>
 
-#include "../Main.h"
-#include "../exceptions/EmulatorException.h"
+#include "../../Main.h"
+#include "../../exceptions/EmulatorException.h"
 
 /* CPU
  * Diagram: https://davidmjc.github.io/6502/bd.svg

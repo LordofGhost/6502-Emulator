@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "./clock/CrystalOscillator.h"
-#include "memory/AT28C256.h"
+#include "../clock/CrystalOscillator.h"
+#include "../memory/AT28C256.h"
 
 extern AT28C256 ROM;
 extern CrystalOscillator Clock;
