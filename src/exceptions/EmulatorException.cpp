@@ -11,7 +11,9 @@ extern std::vector<EmulatorException> EmulatorExceptions;
 EmulatorException::EmulatorException(e_Component component, Exception_t type, unsigned int code,
                                      const char* description) noexcept {
     this->component = component;
-    this->cycle = Clock.getCycleCount();
+    this->cycle =
+        Clock.getCycleCount() + 1;  // Needs to be incremented, because exceptions are thrown during
+                                    // the cycle, but the counter is incremented after the cycle
     this->type = type;
     this->code = code;
     description == nullptr ? this->description = "Unknown Error"
@@ -22,15 +24,16 @@ EmulatorException::EmulatorException(e_Component component, Exception_t type, un
 std::string EmulatorException::toString() const noexcept {
     return "-- Exception --\n"
            "Component: " +
-           componentString() + "\nCycle: " + std::to_string(this->cycle) + "\nType: " + typeString() +
-           "\nCode: " + std::to_string(this->code) + "\nDescription: " + this->description;
+           componentString() + "\nCycle: " + std::to_string(this->cycle) +
+           "\nType: " + typeString() + "\nCode: " + std::to_string(this->code) +
+           "\nDescription: " + this->description;
 }
 
 std::string EmulatorException::toStringMD() const noexcept {
     return "> #### Exception\n"
            "> Component: " +
-           componentString() + "<br>\n> Cycle: " + std::to_string(this->cycle) +"<br>\n> Type: " + typeString() +
-           "<br>\n> Code: " + std::to_string(this->code) +
+           componentString() + "<br>\n> Cycle: " + std::to_string(this->cycle) +
+           "<br>\n> Type: " + typeString() + "<br>\n> Code: " + std::to_string(this->code) +
            "<br>\n> Description: " + this->description + "<br>\n\n";
 }
 

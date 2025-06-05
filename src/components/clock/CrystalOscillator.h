@@ -20,6 +20,7 @@ class CrystalOscillator {
     bool running = false;
 
    public:
+    // This counter is incremented after the cycle
     unsigned long getCycleCount() const { return cycles.size(); }
     std::chrono::steady_clock::time_point getCycleStartTime() const { return cycleStartTime; }
 

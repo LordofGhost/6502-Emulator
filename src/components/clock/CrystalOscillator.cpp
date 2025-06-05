@@ -52,8 +52,8 @@ void CrystalOscillator::tick() {
 }
 
 bool CrystalOscillator::checkForStopSignal() {
-    if (EmulatorExceptions.empty()) return false;
-    return true;
+    if (!EmulatorExceptions.empty() && !arguments.continueException) return true;
+    return false;
 }
 
 void CrystalOscillator::reset() {
