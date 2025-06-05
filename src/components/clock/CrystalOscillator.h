@@ -8,7 +8,7 @@
 
 enum Phase { Ph1 = 1, Ph2 = 2 };
 
-Phase& operator++(Phase& phase, int) {
+inline Phase& operator++(Phase& phase, int) {
     phase = static_cast<Phase>(static_cast<int>(phase) + 1);
     return phase;
 }
