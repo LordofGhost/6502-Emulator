@@ -3,7 +3,9 @@
 
 #include <format>
 #include <functional>
+#include <list>
 #include <map>
+#include <queue>
 
 #include "../../Main.h"
 #include "../Component.h"
@@ -20,17 +22,13 @@ class W65C02 : public Component {
         // decodeLogic[0x00] = [this]() -> void { return instructions.I_00(); };
     }
 
-    // This methode represents the reset button, which also starts the computer
+    // This methode represents the reset button
     void reset() noexcept;
-
-    // This methode stops the CPU from executing
-    void stop() { b_stop = true; }
 
     // make RW flag visible to memory
     [[nodiscard]] bool getRW() const { return registers.RW; }  // make RW flag visible to memory
 
    private:
-    bool b_stop = false;
     struct Registers {
         Byte A;  // Accumulator
 
@@ -51,7 +49,7 @@ class W65C02 : public Component {
             bool Z;               // Zero
             bool C;               // Carry
 
-            Byte getByte() {
+            Byte getByte() const {
                 return (N << 7) + (V << 6) + (B << 4) + (D << 3) + (I << 2) + (Z << 1) + C;
             }
 
@@ -96,8 +94,15 @@ class W65C02 : public Component {
         W65C02& CPU;
     } registers;
 
+    void fetch();
+
     // This map maps the opcode to the methode in Instructions
     std::map<Byte, std::function<void()>> decodeLogic;
+
+    // This queue consist of arrays with 2 Elements, these represent the Ph1 and Ph2
+    std::queue<std::array<std::function<void()>, 2>,
+               std::list<std::array<std::function<void()>, 2>>>
+        callQueue;
 
     /* Instruction Set
      * This class contains the hole 6502 instructions set including the WDC extensions */
