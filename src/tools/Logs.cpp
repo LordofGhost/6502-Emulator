@@ -12,6 +12,7 @@
 #include "../components/io/W65C22.h"
 #include "../components/memory/AS6C62256.h"
 #include "../components/memory/AT28C256.h"
+#include "../exceptions/EmulatorException.h"
 
 extern W65C02 CPU;
 extern AS6C62256 RAM;

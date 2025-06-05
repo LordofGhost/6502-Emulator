@@ -17,7 +17,8 @@ AS6C62256 RAM;
 AT28C256 ROM;
 W65C22 IO;
 
-constexpr std::array<Component*, 4> components = {&CPU, &RAM, &ROM, &IO};
+// Components array: RAM and ROM need to be updated before CPU
+std::array<Component*, 4> components = {&RAM, &ROM, &IO, &CPU};
 
 // Other parts of the emulator (uppercase because clock is already declared in _time.h)
 CrystalOscillator Clock;
