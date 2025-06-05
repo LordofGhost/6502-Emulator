@@ -1,6 +1,7 @@
 #include "AT28C256.h"
 
 #include <fstream>
+#include <iostream>
 
 #include "../../exceptions/EmulatorException.h"
 #include "../Bus.h"
@@ -49,7 +50,7 @@ void AT28C256::read() const {
 
 void AT28C256::onClockCycle(Phase phase) {
     // Check if highest address bit is set, which is connected to the CS enable pin
-    if ((bus.getAddress() & 0x8000) == 0 && phase == Ph2) {
+    if (bus.getAddress() >= 0x8000 && phase == Ph2) {
         read();
     }
 }
