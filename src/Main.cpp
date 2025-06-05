@@ -42,13 +42,16 @@ int main(int argc, char* argv[]) {
                 if (argv[i + 1] != nullptr) arguments.programPath = argv[i + 1];
             }
 
-            // Check for logs flag
+            // Check for log flags
             if (!strcmp(argv[i], "-l") || !strcmp(argv[i], "--log")) arguments.logs = true;
             if (!strcmp(argv[i], "-L") || !strcmp(argv[i], "--LOG")) arguments.logsAll = true;
+
+            // Check for exception handling flags
+            if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "--exc")) arguments.continueException = true;
         }
     }
 
-    // When help flag is set only the help message is shown
+    // When a help flag is set only the help message is shown
     if (arguments.help) {
         std::cout << "Welcome to 6502 emulator!\n\n"
                      "Usage: emulator [-h | --help] [-p | --path <Path>] [-l | --log]\n\n"
@@ -58,6 +61,7 @@ int main(int argc, char* argv[]) {
                      "\t-l --log\t\t\tCreate log file when process terminates."
                      "\t-L --LOG\t\t\tCreate log file on every clock cycle. Note the limit for log "
                      "files per run is 100."
+                     "\t-e --exc\t\t\tContinue process when emulator exceptions is thrown."
                      ""
                   << std::endl;
         return 0;

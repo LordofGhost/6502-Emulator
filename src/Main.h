@@ -13,6 +13,7 @@ struct Arguments {
     bool help = false;
     bool logs = false;
     bool logsAll = false;
+    bool continueException = false;
 };
 
 #endif  // MAIN_H
