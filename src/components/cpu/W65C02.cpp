@@ -14,54 +14,54 @@ void W65C02::reset() noexcept {
     }
 
     // Cycle 1: Set processor flags P: I=1,D=0
-    callQueue.push({nullptr, [=] {
+    callQueue.push({nullptr, [&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0x01FF);  // dummy address
                         registers.P.I = true;
                         registers.P.D = false;
                     }});
     // Cycle 2: Dummy-readcycle
-    callQueue.push({nullptr, [=] {
+    callQueue.push({nullptr, [&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0x01FE);  // dummy address
                     }});
     // Cycle 3: Dummy-readcycle
-    callQueue.push({nullptr, [=] {
+    callQueue.push({nullptr, [&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0x01FD);  // dummy address
                     }});
     // Cycle 4: Dummy-readcycle
-    callQueue.push({nullptr, [=] {
+    callQueue.push({nullptr, [&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0x01FC);  // dummy address
                     }});
     // Cycle 5: Dummy-readcycle
-    callQueue.push({nullptr, [=] {
+    callQueue.push({nullptr, [&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0x01FB);  // dummy address
                     }});
     // Cycle 6: Load reset vector
-    callQueue.push({[=] {
+    callQueue.push({[&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0xFFFC);  // Low reset vector byte
                     },
-                    [=] { registers.PC = bus.getData(); }});
+                    [&] { registers.PC = bus.getData(); }});
     // Cycle 7: Load reset vector
-    callQueue.push({[=] {
+    callQueue.push({[&] {
                         registers.RW = true;     // set to read
                         bus.setAddress(0xFFFD);  // High reset vector byte
                     },
-                    [=] {
+                    [&] {
                         registers.PC += bus.getData() << 8;  // Add high byte to Program Counter
                     }});
 }
 
 void W65C02::fetch() {
-    callQueue.push({[=] {
+    callQueue.push({[&] {
                         registers.RW = true;
                         bus.setAddress(registers.PC);
                     },
-                    [=] {
+                    [&] {
                         // Decode & Check if op code exists; increment Program Counter
                         if (decodeLogic.contains(registers.PC)) {
                             // Get instruction and execute it, which fills the call stack
