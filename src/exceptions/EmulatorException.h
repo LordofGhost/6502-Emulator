@@ -8,15 +8,15 @@
 enum Exception_t { e_INFO, e_WARNING, e_CRITICAL };
 
 class EmulatorException : std::exception {
-   private:
     e_Component component;
+    long long cycle;
     Exception_t type;
     unsigned int code;
     std::string description;
 
    public:
     EmulatorException(e_Component component, Exception_t type, unsigned int code,
-              const char* description) noexcept;
+                      const char* description) noexcept;
     std::string toString() const noexcept;
     std::string toStringMD() const noexcept;
 
