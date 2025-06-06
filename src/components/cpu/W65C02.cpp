@@ -57,20 +57,16 @@ void W65C02::reset() noexcept {
 }
 
 void W65C02::fetch() {
+    // SYNC pin is high
     callQueue.push({[&] {
-                        registers.RW = true;
+                        registers.RW = READ;
                         bus.setAddress(registers.PC);
                     },
                     [&] {
-                        // Decode & Check if op code exists; increment Program Counter
-                        if (decodeLogic.contains(registers.PC)) {
-                            // Get instruction and execute it, which fills the call stack
-                            decodeLogic.at(registers.PC)();
-                            // Point the Program Counter to the next instruction
-                            registers.PC++;
-                        } else
-                            throw EmulatorException(e_CPU, e_CRITICAL, 1400,
-                                                    "Op code does not exist.");
+                        // Fill the call stack with the instruction
+                        callInstruction(bus.getData());
+                        // Point the Program Counter to the next instruction
+                        registers.PC++;
                     }});
 }
 
@@ -101,3 +97,21 @@ void W65C02::onClockCycle(Phase phase) {
 }
 
 std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }
+
+void W65C02::callInstruction(const Byte opCode) {
+    // Note the cycle count includes the 1 fetch cycle
+    switch (opCode) {
+        case 0xA9:
+            // TODO
+            // Addressing: immediate; Cycles: 2; Bytes: 2
+            callQueue.push({[&] {
+                                registers.RW = READ;
+                                bus.setAddress(registers.PC);
+                                registers.PC++;
+                            },
+                            [&] { registers.A = bus.getData(); }});
+            break;
+        default:
+            throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
+    }
+}

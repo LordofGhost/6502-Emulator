@@ -5,9 +5,9 @@
     "active": true
   },
   "ROM": {
-    "active": false,
-    "start": 0,
-    "end": 256
+    "active": true,
+    "start": 32752,
+    "end": 32767
   },
   "RAM": {
     "active": true,
