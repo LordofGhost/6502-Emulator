@@ -16,6 +16,8 @@
 /* CPU
  * Diagram: https://davidmjc.github.io/6502/bd.svg
  * Datasheet: https://eater.net/datasheets/w65c02s.pdf
+ * Instruction Set: https://www.masswerk.at/6502/6502_instruction_set.html
+ *                  https://www.pagetable.com/c64ref/6502
  */
 
 class W65C02 : public Component {

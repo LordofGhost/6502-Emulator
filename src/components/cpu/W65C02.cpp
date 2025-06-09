@@ -102,14 +102,18 @@ void W65C02::callInstruction(const Byte opCode) {
     // Note the cycle count includes the 1 fetch cycle
     switch (opCode) {
         case 0xA9:
-            // TODO
             // Addressing: immediate; Cycles: 2; Bytes: 2
             callQueue.push({[&] {
                                 registers.RW = READ;
                                 bus.setAddress(registers.PC);
                                 registers.PC++;
                             },
-                            [&] { registers.A = bus.getData(); }});
+                            [&] {
+                                registers.A = bus.getData();
+                                registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
+                                registers.A >> 7 == 1 ? registers.P.N = true
+                                                      : registers.P.N = false;
+                            }});
             break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
