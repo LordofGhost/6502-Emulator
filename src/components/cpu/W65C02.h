@@ -48,6 +48,7 @@ class W65C02 : public Component {
     void YIndexedCycle4Ph1();
     void LDAStorePh2();
     void ReadPCPh1();
+    void ReadADPh1();  // Read from the address stored in ADL and ADH registers
 
     struct Registers {
         // This reference is needed to be able to access non-static members of W65C02
@@ -56,9 +57,9 @@ class W65C02 : public Component {
         Byte A;  // Accumulator
 
         // Index registers
-        Byte X;  // X index
+        Byte X;        // X index
         Byte Y = 0xF;  // Y index
-        Byte S;  // Stack pointer
+        Byte S;        // Stack pointer
 
         Word PC;  // Program Counter
 

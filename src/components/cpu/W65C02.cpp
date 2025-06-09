@@ -103,6 +103,13 @@ std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD
 void W65C02::callInstruction() {
     // Note the cycle count includes the 1 fetch cycle
     switch (registers.IR) {
+        case 0xA5:
+            // LDA $nn; Addressing: zero page; Cycles: 3; Bytes: 2
+            // Read at PC and store in ADL
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            // Read at ADL und load the value in A
+            callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
+            break;
         case 0xA9:
             // LDA #$nn; Addressing: immediate; Cycles: 2; Bytes: 2
             // Read at PC and store in A
@@ -122,15 +129,6 @@ void W65C02::callInstruction() {
                             },
                             [this] { LDAStorePh2(); }});
             break;
-        case 0xBD:
-            // LDA $nnnn,X; Addressing: x-indexed absolute; Cycles: 4+p; Bytes 3
-            // Fetch low byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
-            // Fetch high byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
-            // Add x to the address and load the value in a
-            callQueue.push({[this] { XIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
-            break;
         case 0xB9:
             // LDA $nnnn,Y; Addressing: y-indexed absolute; Cycles: 4+p; Bytes 3
             // Fetch low byte
@@ -139,6 +137,15 @@ void W65C02::callInstruction() {
             callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
             // Add y to the address and load the value in A
             callQueue.push({[this] { YIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
+            break;
+        case 0xBD:
+            // LDA $nnnn,X; Addressing: x-indexed absolute; Cycles: 4+p; Bytes 3
+            // Fetch low byte
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            // Fetch high byte
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            // Add x to the address and load the value in a
+            callQueue.push({[this] { XIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
             break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
@@ -192,4 +199,9 @@ void W65C02::ReadPCPh1() {
     registers.RW = READ;
     bus.setAddress(registers.PC);
     registers.PC++;
+}
+
+void W65C02::ReadADPh1() {
+    registers.RW = READ;
+    bus.setAddress((registers.ADH << 8) + registers.ADL);
 }
