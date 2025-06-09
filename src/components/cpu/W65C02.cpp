@@ -117,6 +117,32 @@ void W65C02::callInstruction() {
                                                       : registers.P.N = false;
                             }});
             break;
+        case 0xAD:
+            // Addressing: absolute; Cycles: 4; Bytes: 3
+            callQueue.push({[&] {
+                                registers.RW = READ;
+                                bus.setAddress(registers.PC);
+                                registers.PC++;
+                            },
+                            [&] { registers.TR = bus.getData(); }});
+            callQueue.push({[&] {
+                                registers.RW = READ;
+                                bus.setAddress(registers.PC);
+                                registers.PC++;
+                            },
+                            nullptr});
+            callQueue.push({[&] {
+                                registers.RW = READ;
+                                bus.setAddress((bus.getData() << 8) + registers.TR);
+                                registers.PC++;
+                            },
+                            [&] {
+                                registers.A = bus.getData();
+                                registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
+                                registers.A >> 7 == 1 ? registers.P.N = true
+                                                      : registers.P.N = false;
+                            }});
+            break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
     }

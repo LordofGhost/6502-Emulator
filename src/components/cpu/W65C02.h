@@ -58,7 +58,9 @@ class W65C02 : public Component {
 
         bool RW;  // true = Read; false = Write
 
-        Byte IR;  // Instruction Register
+        // Hidden registers
+        Byte IR;  // Instruction register
+        Byte TR;  // Temporary register
 
         // Processor flags NV-BDIZC (7-0)
         struct s_P {
