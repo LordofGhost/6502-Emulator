@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
         ROM.load(arguments.programPath);
     } catch (EmulatorException& e) {
         std::cout << e.toString() << std::endl;
+        return 0;
     }
 
     // Start the Clock (entry Point)

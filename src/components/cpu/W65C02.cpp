@@ -14,32 +14,32 @@ void W65C02::reset() noexcept {
     }
 
     // Cycle 1: Set processor flags P: I=1,D=0
-    callQueue.push({nullptr, [&] {
-                        registers.RW = true;     // set to read
-                        bus.setAddress(0x01FF);  // dummy address
-                        registers.P.I = true;
-                        registers.P.D = false;
-                    }});
+    callQueue.push({[&] {
+        registers.RW = true;     // set to read
+        bus.setAddress(0x01FF);  // dummy address
+        registers.P.I = true;
+        registers.P.D = false;
+    }});
     // Cycle 2: Dummy-readcycle
-    callQueue.push({nullptr, [&] {
-                        registers.RW = true;     // set to read
-                        bus.setAddress(0x01FE);  // dummy address
-                    }});
+    callQueue.push({[&] {
+        registers.RW = true;     // set to read
+        bus.setAddress(0x01FE);  // dummy address
+    }});
     // Cycle 3: Dummy-readcycle
-    callQueue.push({nullptr, [&] {
-                        registers.RW = true;     // set to read
-                        bus.setAddress(0x01FD);  // dummy address
-                    }});
+    callQueue.push({[&] {
+        registers.RW = true;     // set to read
+        bus.setAddress(0x01FD);  // dummy address
+    }});
     // Cycle 4: Dummy-readcycle
-    callQueue.push({nullptr, [&] {
-                        registers.RW = true;     // set to read
-                        bus.setAddress(0x01FC);  // dummy address
-                    }});
+    callQueue.push({[&] {
+        registers.RW = true;     // set to read
+        bus.setAddress(0x01FC);  // dummy address
+    }});
     // Cycle 5: Dummy-readcycle
-    callQueue.push({nullptr, [&] {
-                        registers.RW = true;     // set to read
-                        bus.setAddress(0x01FB);  // dummy address
-                    }});
+    callQueue.push({[&] {
+        registers.RW = true;     // set to read
+        bus.setAddress(0x01FB);  // dummy address
+    }});
     // Cycle 6: Load reset vector
     callQueue.push({[&] {
                         registers.RW = true;     // set to read
