@@ -103,6 +103,24 @@ std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD
 void W65C02::callInstruction() {
     // Note the cycle count includes the 1 fetch cycle
     switch (registers.IR) {
+        case 0xA1:
+            // LDA ($nn,X); Addressing: x-indexed zero page indirect; Cycles: 6; Bytes : 2
+            // Read at PC and store in ADL
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            // Add X to the ADL register, discard carry
+            callQueue.push({[this] {
+                registers.RW = READ;
+                registers.ADL += registers.X;
+            }});
+            // Read from ADL register and load the value in ADL
+            callQueue.push({[this] { bus.setAddress(registers.ADL); },
+                            [this] { registers.ADL = bus.getData(); }});
+            // Read from old value of ADL register incremented by 1 and load the value in ADH
+            callQueue.push({[this] { bus.setAddress(bus.getAddress() + 1); },
+                            [this] { registers.ADH = bus.getData(); }});
+            // Read from AD register and load the value in A
+            callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
+            break;
         case 0xA5:
             // LDA $nn; Addressing: zero page; Cycles: 3; Bytes: 2
             // Read at PC and store in ADL
