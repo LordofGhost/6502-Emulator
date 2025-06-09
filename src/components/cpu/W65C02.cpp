@@ -108,28 +108,56 @@ void W65C02::callInstruction() {
     };
 
     // Used for LDA instructions
-    const std::function setABUS_checkPZ_checkPN = [&] {
+    const std::function setABus_checkPZ_checkPN = [&] {
         registers.A = bus.getData();
         registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
         registers.A >> 7 == 1 ? registers.P.N = true : registers.P.N = false;
     };
 
+    // Used for X-indexed absolute
+    const std::function XIndexedCycle4Ph1 = [&] {
+        // Check for page crossing
+        if (registers.ADL + registers.X <= 0xFF) {
+            // No page crossing so data can bei read same cycle in Ph2
+            registers.ADL += registers.X;
+            bus.setAddress((registers.ADH << 8) + registers.ADL);
+        } else {
+            // Page crossed, additional cycle is added
+            registers.ADL += registers.X - 0x80;
+            callQueue.front()[1] = nullptr;
+            callQueue.push({[&] {
+                                registers.ADH++;
+                                bus.setAddress((registers.ADH << 8) + registers.ADL);
+                            },
+                            setABus_checkPZ_checkPN});
+        }
+    };
+
     // Note the cycle count includes the 1 fetch cycle
     switch (registers.IR) {
         case 0xA9:
-            // Addressing: immediate; Cycles: 2; Bytes: 2
-            callQueue.push({setRead_setBusPC_incrementPC, setABUS_checkPZ_checkPN});
+            // LDA #$nn; Addressing: immediate; Cycles: 2; Bytes: 2
+            callQueue.push({setRead_setBusPC_incrementPC, setABus_checkPZ_checkPN});
             break;
         case 0xAD:
-            // Addressing: absolute; Cycles: 4; Bytes: 3
-            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.TR = bus.getData(); }});
+            // LDA $nnnn; Addressing: absolute; Cycles: 4; Bytes: 3
+            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADL = bus.getData(); }});
             callQueue.push({setRead_setBusPC_incrementPC, nullptr});
             callQueue.push({[&] {
                                 registers.RW = READ;
-                                bus.setAddress((bus.getData() << 8) + registers.TR);
+                                bus.setAddress((bus.getData() << 8) + registers.ADL);
                                 registers.PC++;
                             },
-                            setABUS_checkPZ_checkPN});
+                            setABus_checkPZ_checkPN});
+            break;
+        case 0xBD:
+            // LDA $nnnn,X; Addressing: x-indexed absolute; Cycles: 4+p; Bytes 3
+            // Fetch low byte
+            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADL = bus.getData(); }});
+            // Fetch high byte
+            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADH = bus.getData(); }});
+
+            callQueue.push({XIndexedCycle4Ph1, setABus_checkPZ_checkPN});
             break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
