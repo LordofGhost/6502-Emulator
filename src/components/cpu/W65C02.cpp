@@ -101,47 +101,35 @@ void W65C02::onClockCycle(Phase phase) {
 std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }
 
 void W65C02::callInstruction() {
+    const std::function setRead_setBusPC_incrementPC = [&] {
+        registers.RW = READ;
+        bus.setAddress(registers.PC);
+        registers.PC++;
+    };
+
+    // Used for LDA instructions
+    const std::function setABUS_checkPZ_checkPN = [&] {
+        registers.A = bus.getData();
+        registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
+        registers.A >> 7 == 1 ? registers.P.N = true : registers.P.N = false;
+    };
+
     // Note the cycle count includes the 1 fetch cycle
     switch (registers.IR) {
         case 0xA9:
             // Addressing: immediate; Cycles: 2; Bytes: 2
-            callQueue.push({[&] {
-                                registers.RW = READ;
-                                bus.setAddress(registers.PC);
-                                registers.PC++;
-                            },
-                            [&] {
-                                registers.A = bus.getData();
-                                registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
-                                registers.A >> 7 == 1 ? registers.P.N = true
-                                                      : registers.P.N = false;
-                            }});
+            callQueue.push({setRead_setBusPC_incrementPC, setABUS_checkPZ_checkPN});
             break;
         case 0xAD:
             // Addressing: absolute; Cycles: 4; Bytes: 3
-            callQueue.push({[&] {
-                                registers.RW = READ;
-                                bus.setAddress(registers.PC);
-                                registers.PC++;
-                            },
-                            [&] { registers.TR = bus.getData(); }});
-            callQueue.push({[&] {
-                                registers.RW = READ;
-                                bus.setAddress(registers.PC);
-                                registers.PC++;
-                            },
-                            nullptr});
+            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.TR = bus.getData(); }});
+            callQueue.push({setRead_setBusPC_incrementPC, nullptr});
             callQueue.push({[&] {
                                 registers.RW = READ;
                                 bus.setAddress((bus.getData() << 8) + registers.TR);
                                 registers.PC++;
                             },
-                            [&] {
-                                registers.A = bus.getData();
-                                registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
-                                registers.A >> 7 == 1 ? registers.P.N = true
-                                                      : registers.P.N = false;
-                            }});
+                            setABUS_checkPZ_checkPN});
             break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
