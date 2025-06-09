@@ -41,7 +41,7 @@ class W65C02 : public Component {
                std::list<std::array<std::function<void()>, 2>>>
         callQueue;
 
-    void callInstruction(Byte opCode);
+    void callInstruction();
 
     struct Registers {
         // This reference is needed to be able to access non-static members of W65C02
@@ -57,6 +57,8 @@ class W65C02 : public Component {
         Word PC;  // Program Counter
 
         bool RW;  // true = Read; false = Write
+
+        Byte IR;  // Instruction Register
 
         // Processor flags NV-BDIZC (7-0)
         struct s_P {
@@ -89,19 +91,15 @@ class W65C02 : public Component {
         std::string toStringMD() const {
             return "## Registers\n"
                    "| Register | Value (bin) | Value (dec) | Value (hex)|\n"
-                   "|----------|-------------|-------------|------------|\n"
-                   "| A (Accumulator) | " +
-                   std::format("{:B}", A) + " | " + std::to_string(A) + " | " +
-                   std::format("{:X}", A) + " |\n" + "| X (X index) | " + std::format("{:B}", X) +
-                   " | " + std::to_string(X) + " | " + std::format("{:X}", X) + " |\n" +
-                   "| Y (Y index) | " + std::format("{:B}", Y) + " | " + std::to_string(Y) + " | " +
-                   std::format("{:X}", Y) + " |\n" + "| S (Stack pointer) |" +
-                   std::format("{:B}", S) + " | " + std::to_string(S) + " | " +
-                   std::format("{:X}", S) + " |\n" + "| PC (Program Counter) | " +
-                   std::format("{:B}", PC) + " | " + std::to_string(PC) + " | " +
-                   std::format("{:X}", PC) + " |\n" + "| RW (Read/Write) | " +
-                   std::format("{:B}", RW) + " | " + std::to_string(RW) + " | " +
-                   std::format("{:X}", RW) + " |\n" + P.toStringMD();
+                   "|----------|-------------|-------------|------------|\n" +
+                   std::format("| A (Accumulator)           | {:B} | {:d} | {:X} |\n", A, A, A) +
+                   std::format("| X (X index)               | {:B} | {:d} | {:X} |\n", X, X, X) +
+                   std::format("| Y (Y index)               | {:B} | {:d} | {:X} |\n", Y, Y, Y) +
+                   std::format("| S (Stack pointer)         | {:B} | {:d} | {:X} |\n", S, S, S) +
+                   std::format("| PC (Program Counter)      | {:B} | {:d} | {:X} |\n", PC, PC, PC) +
+                   std::format("| RW (Read/Write)           | {:B} | {:d} | {:X} |\n", RW, RW, RW) +
+                   std::format("| IR (Instruction Register) | {:B} | {:d} | {:X} |\n", IR, IR, IR) +
+                   P.toStringMD();
         }
 
        private:

@@ -63,8 +63,10 @@ void W65C02::fetch() {
                         bus.setAddress(registers.PC);
                     },
                     [&] {
+                        // Set the Instruction Register
+                        registers.IR = bus.getData();
                         // Fill the call stack with the instruction
-                        callInstruction(bus.getData());
+                        callInstruction();
                         // Point the Program Counter to the next instruction
                         registers.PC++;
                     }});
@@ -98,9 +100,9 @@ void W65C02::onClockCycle(Phase phase) {
 
 std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }
 
-void W65C02::callInstruction(const Byte opCode) {
+void W65C02::callInstruction() {
     // Note the cycle count includes the 1 fetch cycle
-    switch (opCode) {
+    switch (registers.IR) {
         case 0xA9:
             // Addressing: immediate; Cycles: 2; Bytes: 2
             callQueue.push({[&] {
