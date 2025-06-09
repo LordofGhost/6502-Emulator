@@ -101,65 +101,65 @@ void W65C02::onClockCycle(Phase phase) {
 std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }
 
 void W65C02::callInstruction() {
-    const std::function setRead_setBusPC_incrementPC = [&] {
-        registers.RW = READ;
-        bus.setAddress(registers.PC);
-        registers.PC++;
-    };
-
-    // Used for LDA instructions
-    const std::function setABus_checkPZ_checkPN = [&] {
-        registers.A = bus.getData();
-        registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
-        registers.A >> 7 == 1 ? registers.P.N = true : registers.P.N = false;
-    };
-
-    // Used for X-indexed absolute
-    const std::function XIndexedCycle4Ph1 = [&] {
-        // Check for page crossing
-        if (registers.ADL + registers.X <= 0xFF) {
-            // No page crossing so data can bei read same cycle in Ph2
-            registers.ADL += registers.X;
-            bus.setAddress((registers.ADH << 8) + registers.ADL);
-        } else {
-            // Page crossed, additional cycle is added
-            registers.ADL += registers.X - 0x80;
-            callQueue.front()[1] = nullptr;
-            callQueue.push({[&] {
-                                registers.ADH++;
-                                bus.setAddress((registers.ADH << 8) + registers.ADL);
-                            },
-                            setABus_checkPZ_checkPN});
-        }
-    };
-
     // Note the cycle count includes the 1 fetch cycle
     switch (registers.IR) {
         case 0xA9:
             // LDA #$nn; Addressing: immediate; Cycles: 2; Bytes: 2
-            callQueue.push({setRead_setBusPC_incrementPC, setABus_checkPZ_checkPN});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { LDAStorePh2(); }});
             break;
         case 0xAD:
             // LDA $nnnn; Addressing: absolute; Cycles: 4; Bytes: 3
-            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADL = bus.getData(); }});
-            callQueue.push({setRead_setBusPC_incrementPC, nullptr});
-            callQueue.push({[&] {
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, nullptr});
+            callQueue.push({[this] {
                                 registers.RW = READ;
                                 bus.setAddress((bus.getData() << 8) + registers.ADL);
                                 registers.PC++;
                             },
-                            setABus_checkPZ_checkPN});
+                            [this] { LDAStorePh2(); }});
             break;
         case 0xBD:
             // LDA $nnnn,X; Addressing: x-indexed absolute; Cycles: 4+p; Bytes 3
             // Fetch low byte
-            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
             // Fetch high byte
-            callQueue.push({setRead_setBusPC_incrementPC, [&] { registers.ADH = bus.getData(); }});
-
-            callQueue.push({XIndexedCycle4Ph1, setABus_checkPZ_checkPN});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            // Add x to the address and load the value in a
+            callQueue.push({[this] { XIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
             break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
     }
+}
+
+// Used for X-indexed absolute
+void W65C02::XIndexedCycle4Ph1() {
+    // Check for page crossing
+    if (registers.ADL + registers.X <= 0xFF) {
+        // No page crossing so data can bei read same cycle in Ph2
+        registers.ADL += registers.X;
+        bus.setAddress((registers.ADH << 8) + registers.ADL);
+    } else {
+        // Page crossed, additional cycle is added
+        registers.ADL += registers.X;
+        callQueue.front()[1] = nullptr;
+        callQueue.push({[this] {
+                            registers.ADH++;
+                            bus.setAddress((registers.ADH << 8) + registers.ADL);
+                        },
+                        [this] { LDAStorePh2(); }});
+    }
+}
+
+// Used for LDA instructions to read data from the bus and write it in the A register
+void W65C02::LDAStorePh2() {
+    registers.A = bus.getData();
+    registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
+    registers.A >> 7 == 1 ? registers.P.N = true : registers.P.N = false;
+}
+
+void W65C02::ReadPCPh1() {
+    registers.RW = READ;
+    bus.setAddress(registers.PC);
+    registers.PC++;
 }

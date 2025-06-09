@@ -43,6 +43,11 @@ class W65C02 : public Component {
 
     void callInstruction();
 
+    // Reusable instruction phases
+    void XIndexedCycle4Ph1();
+    void LDAStorePh2();
+    void ReadPCPh1();
+
     struct Registers {
         // This reference is needed to be able to access non-static members of W65C02
         explicit Registers(W65C02& parent) : CPU(parent) {}
