@@ -77,14 +77,14 @@ class W65C02 : public Component {
             std::string toStringMD() const {
                 return "### Processor flags\n"
                        "| Register | Value (bin) |\n"
-                       "|----------|-------------|\n"
-                       "| N (Negative) | " +
-                       std::format("{:B}", N) + " |\n" + "| V (Overflow) | " +
-                       std::format("{:B}", V) + " |\n" + "| B (Break) | " + std::format("{:B}", B) +
-                       " |\n" + "| D (Decimal) | " + std::format("{:B}", D) + " |\n" +
-                       "| I (Interrupt Disable) | " + std::format("{:B}", I) + " |\n" +
-                       "| Z (Zero) | " + std::format("{:B}", Z) + " |\n" + "| C (Carry) |" +
-                       std::format("{:B}", C) + " |\n";
+                       "|----------|-------------|\n" +
+                       std::format("| N (Negative)          | {:B} |\n", N) +
+                       std::format("| V (Overflow)          | {:B} |\n", V) +
+                       std::format("| B (Break)             | {:B} |\n", B) +
+                       std::format("| D (Decimal)           | {:B} |\n", D) +
+                       std::format("| I (Interrupt Disable) | {:B} |\n", I) +
+                       std::format("| Z (Zero)              | {:B} |\n", Z) +
+                       std::format("| C (Carry)             | {:B} |\n", C);
             }
         } P;
 
