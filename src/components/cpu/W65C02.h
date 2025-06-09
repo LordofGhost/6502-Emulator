@@ -45,6 +45,7 @@ class W65C02 : public Component {
 
     // Reusable instruction phases
     void XIndexedCycle4Ph1();
+    void YIndexedCycle4Ph1();
     void LDAStorePh2();
     void ReadPCPh1();
 
@@ -56,7 +57,7 @@ class W65C02 : public Component {
 
         // Index registers
         Byte X;  // X index
-        Byte Y;  // Y index
+        Byte Y = 0xF;  // Y index
         Byte S;  // Stack pointer
 
         Word PC;  // Program Counter

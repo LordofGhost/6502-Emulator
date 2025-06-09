@@ -105,15 +105,19 @@ void W65C02::callInstruction() {
     switch (registers.IR) {
         case 0xA9:
             // LDA #$nn; Addressing: immediate; Cycles: 2; Bytes: 2
+            // Read at PC and store in A
             callQueue.push({[this] { ReadPCPh1(); }, [this] { LDAStorePh2(); }});
             break;
         case 0xAD:
             // LDA $nnnn; Addressing: absolute; Cycles: 4; Bytes: 3
+            // Fetch low byte
             callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
-            callQueue.push({[this] { ReadPCPh1(); }, nullptr});
+            // Fetch high byte
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            // Read from Address and load the value in A
             callQueue.push({[this] {
                                 registers.RW = READ;
-                                bus.setAddress((bus.getData() << 8) + registers.ADL);
+                                bus.setAddress((registers.ADH << 8) + registers.ADL);
                                 registers.PC++;
                             },
                             [this] { LDAStorePh2(); }});
@@ -127,12 +131,20 @@ void W65C02::callInstruction() {
             // Add x to the address and load the value in a
             callQueue.push({[this] { XIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
             break;
+        case 0xB9:
+            // LDA $nnnn,Y; Addressing: y-indexed absolute; Cycles: 4+p; Bytes 3
+            // Fetch low byte
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            // Fetch high byte
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            // Add y to the address and load the value in A
+            callQueue.push({[this] { YIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
+            break;
         default:
             throw EmulatorException(e_CPU, e_CRITICAL, 1400, "Op code does not exist.");
     }
 }
 
-// Used for X-indexed absolute
 void W65C02::XIndexedCycle4Ph1() {
     // Check for page crossing
     if (registers.ADL + registers.X <= 0xFF) {
@@ -142,6 +154,24 @@ void W65C02::XIndexedCycle4Ph1() {
     } else {
         // Page crossed, additional cycle is added
         registers.ADL += registers.X;
+        callQueue.front()[1] = nullptr;
+        callQueue.push({[this] {
+                            registers.ADH++;
+                            bus.setAddress((registers.ADH << 8) + registers.ADL);
+                        },
+                        [this] { LDAStorePh2(); }});
+    }
+}
+
+void W65C02::YIndexedCycle4Ph1() {
+    // Check for page crossing
+    if (registers.ADL + registers.Y <= 0xFF) {
+        // No page crossing so data can bei read same cycle in Ph2
+        registers.ADL += registers.Y;
+        bus.setAddress((registers.ADH << 8) + registers.ADL);
+    } else {
+        // Page crossed, additional cycle is added
+        registers.ADL += registers.Y;
         callQueue.front()[1] = nullptr;
         callQueue.push({[this] {
                             registers.ADH++;
