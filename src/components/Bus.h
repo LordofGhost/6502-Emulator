@@ -19,12 +19,10 @@ class Bus {
     std::string toStringMD() const {
         return "# Bus\n"
                "| Bus | Value (bin) | Value (dec) | Value (hex) |\n"
-               "|-----|-------------|-------------|-------------|\n"
-               "| Data | " +
-               std::format("{:B}", dataBus) + " | " + std::to_string(dataBus) + " | " +
-               std::format("{:X}", dataBus) + " |\n" + "| Address | " +
-               std::format("{:B}", addressBus) + " | " + std::to_string(addressBus) + " | " +
-               std::format("{:X}", addressBus) + " |\n";
+               "|-----|-------------|-------------|-------------|\n" +
+               std::format("| Data    | {:B} | {:d} | {:X} |\n", dataBus, dataBus, dataBus) +
+               std::format("| Address | {:B} | {:d} | {:X} |\n", addressBus, addressBus,
+                           addressBus);
     }
 };
 
