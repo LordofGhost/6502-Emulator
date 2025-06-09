@@ -57,9 +57,9 @@ class W65C02 : public Component {
         Byte A;  // Accumulator
 
         // Index registers
-        Byte X;        // X index
-        Byte Y = 0xF;  // Y index
-        Byte S;        // Stack pointer
+        Byte X;  // X index
+        Byte Y;  // Y index
+        Byte S;  // Stack pointer
 
         Word PC;  // Program Counter
 

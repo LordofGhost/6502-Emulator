@@ -110,6 +110,18 @@ void W65C02::callInstruction() {
             // Read at ADL und load the value in A
             callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
             break;
+        case 0xB5:
+            // LDA $nn,X; Addressing: x-indexed zero page; Cycles: 4; Bytes: 2
+            // Read at PC and store in ADL
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            // Add X to the ADL register
+            callQueue.push({[this] {
+                registers.RW = READ;
+                registers.ADL += registers.X;
+            }});
+            // Read from ADL register and load the value in A
+            callQueue.push({[this] { bus.setAddress(registers.ADL); }, [this] { LDAStorePh2(); }});
+            break;
         case 0xA9:
             // LDA #$nn; Addressing: immediate; Cycles: 2; Bytes: 2
             // Read at PC and store in A
