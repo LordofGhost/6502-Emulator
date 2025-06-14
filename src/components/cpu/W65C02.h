@@ -46,9 +46,13 @@ class W65C02 : public Component {
     // Reusable instruction phases
     void XIndexedCycle4Ph1();
     void YIndexedCycle4Ph1();
+    void IndirectYIndexedCycle3Ph2();
     void LDAStorePh2();
+    void SetADLPh2();
+    void SetADHPh2();
     void ReadPCPh1();
-    void ReadADPh1();  // Read from the address stored in ADL and ADH registers
+    void ReadADPh1();      // Read from the address stored in ADL and ADH registers
+    void ReadNextZPPh1();  // Read next address from zero page
 
     struct Registers {
         // This reference is needed to be able to access non-static members of W65C02

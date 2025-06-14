@@ -106,32 +106,37 @@ void W65C02::callInstruction() {
         case 0xA1:
             // LDA ($nn,X); Addressing: x-indexed zero page indirect; Cycles: 6; Bytes : 2
             // Read at PC and store in ADL
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Add X to the ADL register, discard carry
             callQueue.push({[this] {
                 registers.RW = READ;
                 registers.ADL += registers.X;
             }});
             // Read from ADL register and load the value in ADL
-            callQueue.push({[this] { bus.setAddress(registers.ADL); },
-                            [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { bus.setAddress(registers.ADL); }, [this] { SetADLPh2(); }});
             // Read from old value of ADL register incremented by 1 and load the value in ADH
-            callQueue.push({[this] { bus.setAddress(bus.getAddress() + 1); },
-                            [this] { registers.ADH = bus.getData(); }});
+            callQueue.push({[this] { ReadNextZPPh1(); }, [this] { SetADHPh2(); }});
             // Read from AD register and load the value in A
             callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
             break;
         case 0xA5:
             // LDA $nn; Addressing: zero page; Cycles: 3; Bytes: 2
             // Read at PC and store in ADL
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Read at ADL und load the value in A
             callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
+            break;
+        case 0xB1:
+            // LDA ($nn),Y; Addressing: zero page indirect y-indexed; Cycles: 5+p; Bytes: 2
+            // Read at PC and store in ADL (address inside zero page)
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
+            // Read low address byte from zero page and add it to Y
+            callQueue.push({[this] { ReadADPh1(); }, [this] { IndirectYIndexedCycle3Ph2(); }});
             break;
         case 0xB5:
             // LDA $nn,X; Addressing: x-indexed zero page; Cycles: 4; Bytes: 2
             // Read at PC and store in ADL
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Add X to the ADL register
             callQueue.push({[this] {
                 registers.RW = READ;
@@ -148,9 +153,9 @@ void W65C02::callInstruction() {
         case 0xAD:
             // LDA $nnnn; Addressing: absolute; Cycles: 4; Bytes: 3
             // Fetch low byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Fetch high byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADHPh2(); }});
             // Read from Address and load the value in A
             callQueue.push({[this] {
                                 registers.RW = READ;
@@ -162,18 +167,18 @@ void W65C02::callInstruction() {
         case 0xB9:
             // LDA $nnnn,Y; Addressing: y-indexed absolute; Cycles: 4+p; Bytes 3
             // Fetch low byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Fetch high byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADHPh2(); }});
             // Add y to the address and load the value in A
             callQueue.push({[this] { YIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
             break;
         case 0xBD:
             // LDA $nnnn,X; Addressing: x-indexed absolute; Cycles: 4+p; Bytes 3
             // Fetch low byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADL = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Fetch high byte
-            callQueue.push({[this] { ReadPCPh1(); }, [this] { registers.ADH = bus.getData(); }});
+            callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADHPh2(); }});
             // Add x to the address and load the value in a
             callQueue.push({[this] { XIndexedCycle4Ph1(); }, [this] { LDAStorePh2(); }});
             break;
@@ -218,12 +223,40 @@ void W65C02::YIndexedCycle4Ph1() {
     }
 }
 
+void W65C02::IndirectYIndexedCycle3Ph2() {
+    // Check if page crossed
+    if (registers.Y + bus.getData() <= 0xFF) {
+        // No page crossing
+        registers.ADL = registers.Y + bus.getData();
+
+        // Read high address byte from zero page and load it in ADH
+        callQueue.push({[this] { ReadNextZPPh1(); }, [this] { SetADHPh2(); }});
+    } else {
+        // Page crossed, extra cycle needed
+        registers.ADL = registers.Y + bus.getData() - 0xFF;
+        // Read high address byte from zero page
+        callQueue.push({[this] { ReadNextZPPh1(); }});
+        // Store address in ADH incremented by one, because of page cross
+        callQueue.push({[this] { registers.ADH = bus.getData() + 1; }});
+    }
+
+    // Read from AD register and store inside A
+    callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
+}
+
 // Used for LDA instructions to read data from the bus and write it in the A register
 void W65C02::LDAStorePh2() {
     registers.A = bus.getData();
     registers.A == 0 ? registers.P.Z = true : registers.P.Z = false;
     registers.A >> 7 == 1 ? registers.P.N = true : registers.P.N = false;
 }
+
+void W65C02::SetADLPh2() {
+    registers.ADL = bus.getData();
+    registers.ADH = 0;
+}
+
+void W65C02::SetADHPh2() { registers.ADH = bus.getData(); }
 
 void W65C02::ReadPCPh1() {
     registers.RW = READ;
@@ -234,4 +267,9 @@ void W65C02::ReadPCPh1() {
 void W65C02::ReadADPh1() {
     registers.RW = READ;
     bus.setAddress((registers.ADH << 8) + registers.ADL);
+}
+
+void W65C02::ReadNextZPPh1() {
+    registers.RW = READ;
+    bus.setAddress(bus.getAddress() + 1);
 }
