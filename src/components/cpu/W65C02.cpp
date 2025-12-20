@@ -1,7 +1,5 @@
 #include "W65C02.h"
 
-#include <iostream>
-
 #include "../../exceptions/EmulatorException.h"
 #include "../Bus.h"
 
@@ -15,41 +13,41 @@ void W65C02::reset() noexcept {
 
     // Cycle 1: Set processor flags P: I=1,D=0
     callQueue.push({[&] {
-        registers.RW = true;     // set to read
-        bus.setAddress(0x01FF);  // dummy address
+        registers.RW = true;     // Set to read
+        bus.setAddress(0x01FF);  // Dummy address
         registers.P.I = true;
         registers.P.D = false;
     }});
     // Cycle 2: Dummy-readcycle
     callQueue.push({[&] {
-        registers.RW = true;     // set to read
-        bus.setAddress(0x01FE);  // dummy address
+        registers.RW = true;     // Set to read
+        bus.setAddress(0x01FE);  // Dummy address
     }});
     // Cycle 3: Dummy-readcycle
     callQueue.push({[&] {
-        registers.RW = true;     // set to read
-        bus.setAddress(0x01FD);  // dummy address
+        registers.RW = true;     // Set to read
+        bus.setAddress(0x01FD);  // Dummy address
     }});
     // Cycle 4: Dummy-readcycle
     callQueue.push({[&] {
-        registers.RW = true;     // set to read
-        bus.setAddress(0x01FC);  // dummy address
+        registers.RW = true;     // Set to read
+        bus.setAddress(0x01FC);  // Dummy address
     }});
     // Cycle 5: Dummy-readcycle
     callQueue.push({[&] {
-        registers.RW = true;     // set to read
-        bus.setAddress(0x01FB);  // dummy address
+        registers.RW = true;     // Set to read
+        bus.setAddress(0x01FB);  // Dummy address
     }});
     // Cycle 6: Load reset vector
     callQueue.push({[&] {
                         registers.RW = true;     // set to read
-                        bus.setAddress(0xFFFC);  // Low reset vector byte
+                        bus.setAddress(0xFFFC);  // Low-reset vector byte
                     },
                     [&] { registers.PC = bus.getData(); }});
     // Cycle 7: Load reset vector
     callQueue.push({[&] {
                         registers.RW = true;     // set to read
-                        bus.setAddress(0xFFFD);  // High reset vector byte
+                        bus.setAddress(0xFFFD);  // High-reset vector byte
                     },
                     [&] {
                         registers.PC += bus.getData() << 8;  // Add high byte to Program Counter
@@ -72,7 +70,7 @@ void W65C02::fetch() {
                     }});
 }
 
-void W65C02::onClockCycle(Phase phase) {
+void W65C02::onClockCycle(const Phase phase) {
     // Load new instruction if callQueue is empty
     if (callQueue.empty()) {
         fetch();
@@ -93,7 +91,7 @@ void W65C02::onClockCycle(Phase phase) {
         // Securely execute function
         if (ph2Call != nullptr) ph2Call();
 
-        // Remove call from queue after Ph1 and Ph2 was executed
+        // Remove call from the queue after Ph1 and Ph2 was executed
         callQueue.pop();
     }
 }
@@ -101,10 +99,10 @@ void W65C02::onClockCycle(Phase phase) {
 std::string W65C02::toStringMD() const { return "# CPU\n" + registers.toStringMD(); }
 
 void W65C02::callInstruction() {
-    // Note the cycle count includes the 1 fetch cycle
+    // Note the cycle count includes one fetch cycle
     switch (registers.IR) {
         case 0xA1:
-            // LDA ($nn,X); Addressing: x-indexed zero page indirect; Cycles: 6; Bytes : 2
+            // LDA ($nn,X); Addressing: x-indexed zero page indirect; Cycles: 6; Bytes: 2
             // Read at PC and store in ADL
             callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
             // Add X to the ADL register, discard carry
@@ -114,7 +112,7 @@ void W65C02::callInstruction() {
             }});
             // Read from ADL register and load the value in ADL
             callQueue.push({[this] { bus.setAddress(registers.ADL); }, [this] { SetADLPh2(); }});
-            // Read from old value of ADL register incremented by 1 and load the value in ADH
+            // Read from the old value of ADL register incremented by 1 and load the value in ADH
             callQueue.push({[this] { ReadNextZPPh1(); }, [this] { SetADHPh2(); }});
             // Read from AD register and load the value in A
             callQueue.push({[this] { ReadADPh1(); }, [this] { LDAStorePh2(); }});
@@ -128,9 +126,9 @@ void W65C02::callInstruction() {
             break;
         case 0xB1:
             // LDA ($nn),Y; Addressing: zero page indirect y-indexed; Cycles: 5+p; Bytes: 2
-            // Read at PC and store in ADL (address inside zero page)
+            // Read at PC and store in ADL (address inside the zero page)
             callQueue.push({[this] { ReadPCPh1(); }, [this] { SetADLPh2(); }});
-            // Read low address byte from zero page and add it to Y
+            // Read low address byte from the zero page and add it to Y
             callQueue.push({[this] { ReadADPh1(); }, [this] { IndirectYIndexedCycle3Ph2(); }});
             break;
         case 0xB5:
@@ -194,7 +192,7 @@ void W65C02::XIndexedCycle4Ph1() {
         registers.ADL += registers.X;
         bus.setAddress((registers.ADH << 8) + registers.ADL);
     } else {
-        // Page crossed, additional cycle is added
+        // Page crossed, an additional cycle is added
         registers.ADL += registers.X;
         callQueue.front()[1] = nullptr;
         callQueue.push({[this] {
@@ -212,7 +210,7 @@ void W65C02::YIndexedCycle4Ph1() {
         registers.ADL += registers.Y;
         bus.setAddress((registers.ADH << 8) + registers.ADL);
     } else {
-        // Page crossed, additional cycle is added
+        // Page crossed, an additional cycle is added
         registers.ADL += registers.Y;
         callQueue.front()[1] = nullptr;
         callQueue.push({[this] {
@@ -229,12 +227,12 @@ void W65C02::IndirectYIndexedCycle3Ph2() {
         // No page crossing
         registers.ADL = registers.Y + bus.getData();
 
-        // Read high address byte from zero page and load it in ADH
+        // Read a high-address byte from the zero page and load it in ADH
         callQueue.push({[this] { ReadNextZPPh1(); }, [this] { SetADHPh2(); }});
     } else {
         // Page crossed, extra cycle needed
         registers.ADL = registers.Y + bus.getData() - 0xFF;
-        // Read high address byte from zero page
+        // Read high-address byte from the zero page
         callQueue.push({[this] { ReadNextZPPh1(); }});
         // Store address in ADH incremented by one, because of page cross
         callQueue.push({[this] { registers.ADH = bus.getData() + 1; }});
