@@ -13,3 +13,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
 file(COPY ${CMAKE_SOURCE_DIR}/logsConfig.json DESTINATION ${CMAKE_BINARY_DIR}/src)
 
 add_subdirectory(src)
+add_subdirectory(lib)
