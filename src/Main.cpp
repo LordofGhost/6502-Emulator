@@ -58,10 +58,10 @@ int main(int argc, char* argv[]) {
                      "Flags:\n"
                      "\t-h --help\t\t\tDisplays help with available flags and value parameters.\n"
                      "\t-p --path\t\t\tSpecifies the path to the ROM file.\n"
-                     "\t-l --log\t\t\tCreate log file when process terminates."
+                     "\t-l --log\t\t\tCreate log file when process terminates.\n"
                      "\t-L --LOG\t\t\tCreate log file on every clock cycle. Note the limit for log "
-                     "files per run is 100."
-                     "\t-e --exc\t\t\tContinue process when emulator exceptions is thrown."
+                     "files per run is 100.\n"
+                     "\t-e --exc\t\t\tContinue process when emulator exceptions is thrown.\n"
                      ""
                   << std::endl;
         return 0;
