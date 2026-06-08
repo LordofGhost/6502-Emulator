@@ -1,60 +1,76 @@
 # 6502 Emulator
 
-This project is about creating an Emulator for my [6502-Computer](https://github.com/LordofGhost/6502-Emulator/edit/main/README.md#roadmap).
-
-## Roadmap
-- [X] Create basic structure and interfaces
-- [X] Load data in ROM
-- [X] Basic CPU & RAM functionality
-- [ ] Complete CPU functionality
-- [ ] Handle IO
-- [ ] Interactive CLI
-
-## Story
+This is a C++23 emulator for my own breadboard 6502 computer. The hardware came first:
+after following [Ben Eater's 6502 computer series](https://eater.net/6502) and building the
+machine myself, I wanted a software that makes it easier to understand the system and
+develop programs for the real computer.
 
 ![6502](https://github.com/user-attachments/assets/8fc72d10-481b-4bbd-b332-685b25106403)
-*This is a replica of the BE65 from Ben Eater*
+*My Ben Eater-inspired breadboard 6502 computer.*
 
-### Why I built it?
+## What It Emulates
 
-- I have always wondered what exactly happens in a computer, when I started writing my first programs with java it didn't really answer my questions but rather raised more questions. Then one day a video of Ben Eater was suggested to me and I was immediately enthusiastic about the idea of building a computer myself.
+The emulator follows the main parts and address layout of the computer I built:
 
-### Building
+- [W65C02S CPU](https://eater.net/datasheets/w65c02s.pdf)
+- [W65C22 VIA](https://eater.net/datasheets/w65c22.pdf) for I/O
+- [AT28C256](https://eater.net/datasheets/28c256.pdf) 32 KiB EEPROM for ROM
+- [AS6C62256](https://eater.net/datasheets/hm62256b.pdf) 32 KiB SRAM, currently mapped into the lower RAM area
 
-- So that I don't lose track of the cables, I opened the [schematics](https://eater.net/schematics/6502-serial.png) on my Ipad and marked each completed connection in green. 
-- Thanks to Ben Eater's videos, I was able to understand what the individual components do during construction.
+| Address range | Device |
+| --- | --- |
+| `$0000-$3FFF` | RAM |
+| `$6000-$600F` | I/O |
+| `$8000-$FFFF` | ROM |
 
-### Problems
+## Architecture
 
-- Get all the parts you need for the computer without spending a to much money
+The emulator is built around small hardware-like components connected by a shared bus and
+driven by a clock.
 
-### Functions
+- `Main.cpp` initializes  and starts the emulator.
+- Every emulated device implements `Component::onClockCycle(Phase)`.
+- The `CrystalOscillator` runs each cycle in two phases, `Ph1` and `Ph2`, and calls every component for each phase. This stems from the basic functionality of the individual components and how they communicate via the bus during a cycle.
+- The CPU drives the address bus, data bus, and read/write state; memory and I/O components react through address decoding.
+- CPU instructions are modeled as queued per-phase micro-operations, which keeps reset, fetch, and instruction timing explicit.
 
-- reading and display inputs of a PS2 Keyboard
-- interact with a other computer by RS232
+## Project Layout
 
-## Information about the computer
+```text
+src/
+  Main.cpp                  emulator entry point and component wiring
+  components/
+    cpu/                    W65C02 CPU model
+    memory/                 RAM, ROM, and memory dump helpers
+    io/                     W65C22 VIA placeholder
+    clock/                  two-phase oscillator
+    Bus.h                   shared address/data bus
+  tools/                    logging and conversion helpers
+  exceptions/               emulator exception types
+```
 
-### Main components
+## Quick Start
 
-- The processor is the [6502](https://eater.net/datasheets/w65c02s.pdf), while the [6522](https://eater.net/datasheets/w65c22.pdf) is used for I/O. The [28c256](https://eater.net/datasheets/28c256.pdf) is used as Rom and the [62256](https://eater.net/datasheets/hm62256b.pdf) as Ram.
+```sh
+cmake -S . -B build
+cmake --build build
+./build/src/emulator -p path/to/rom.bin
+```
 
-### Memory layout
+The ROM image must be exactly 32 KiB, matching the emulated AT28C256 EEPROM. Useful runtime
+flags:
 
-$0000 - $3fff RAM
+- `-l` creates one Markdown log when the emulator stops.
+- `-L` creates Markdown logs during clock cycles, limited to 100 files per run.
+- `-e` continues after emulator exceptions instead of stopping at the first one.
 
-$6000 - $600f I/O
+## Status
 
-$8000 - $ffff ROM
-
-## Conclusion
-
-- It was a very instructive project in terms of my understanding of computers and electronics in general. 
-
-## Future plans
-
-- create my own little os for the computer
-- self-built gpu for the computer to be able to use it on a monitor
+- Basic project structure, component interfaces, ROM loading, RAM access, reset/fetch flow, and LDA-focused CPU work are implemented.
+- Markdown logging can record CPU, RAM, ROM, bus, clock, I/O, and exception state according to `logsConfig.json`.
+- The full CPU instruction set, W65C22 behavior, richer I/O handling, and an interactive CLI are still planned.
 
 ## Credits
-Originally, I was inspired by [Ben Eater](https://eater.net/6502) to build my version of 6502 computer.
+
+This project is inspired by [Ben Eater's 6502 computer](https://eater.net/6502), whose videos
+and schematics helped me build and understand the original breadboard machine.
