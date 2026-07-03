@@ -64,6 +64,8 @@ flags:
 - `-L` creates Markdown logs during clock cycles, limited to 100 files per run.
 - `-e` continues after emulator exceptions instead of stopping at the first one.
 
+In the generated log files, you can see exactly what the emulator did and what each register looked like during that clock cycle.
+
 ## Status
 
 - Basic project structure, component interfaces, ROM loading, RAM access, reset/fetch flow, and LDA-focused CPU work are implemented.
