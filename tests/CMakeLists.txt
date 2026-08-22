@@ -12,6 +12,7 @@ file(GLOB_RECURSE CPU_INSTRUCTION_TEST_SOURCES CONFIGURE_DEPENDS
 
 add_executable(cpu_instruction_tests
         ${CPU_INSTRUCTION_TEST_SOURCES}
+        support/Official6502Opcodes.cpp
         support/W65C02TestHarness.cpp
         ${CMAKE_SOURCE_DIR}/src/components/cpu/W65C02.cpp
         ${CMAKE_SOURCE_DIR}/src/exceptions/EmulatorException.cpp

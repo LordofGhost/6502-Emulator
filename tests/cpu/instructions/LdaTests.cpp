@@ -135,6 +135,8 @@ const std::vector<InstructionCase> LDA_CASES = {
     },
 };
 
+const InstructionCaseRegistration LDA_REGISTRATION{"LDA", LDA_CASES};
+
 }  // namespace
 
 TEST_CASE("LDA supports all implemented addressing modes", "[cpu][instruction][lda]") {

@@ -101,10 +101,50 @@ class W65C02 : public Component {
     void callInstruction();
 
     // Reusable instruction phases
+    enum class ReadAddressingMode {
+        Immediate,
+        ZeroPage,
+        ZeroPageX,
+        ZeroPageY,
+        Absolute,
+        AbsoluteX,
+        AbsoluteY,
+        IndexedIndirect,
+        IndirectIndexed,
+    };
+
+    enum class ModifyAddressingMode { Accumulator, ZeroPage, ZeroPageX, Absolute, AbsoluteX };
+
+    void QueueReadInstruction(ReadAddressingMode mode);
+    void QueueBranch();
+    void BranchPh2();
+    void QueueJMPAbsolute();
+    void QueueJMPIndirect();
+    void QueueJSR();
+    void QueueRTS();
+    void QueueBRK();
+    void QueueRTI();
+    void QueuePush(Byte value);
+    void QueuePull(bool processorStatus);
+    Byte ProcessorStatusForPush(bool breakFlag) const;
+    void SetProcessorStatus(Byte value);
+    void PushPh1(Byte value);
+    void PullStackPh1();
+    void QueueModifyInstruction(ModifyAddressingMode mode);
+    Byte ModifyValue(Byte value);
+    void ExecuteModifyOperationPh2();
+    void WriteModifiedValuePh1();
     void XIndexedCycle4Ph1();
     void YIndexedCycle4Ph1();
     void IndirectYIndexedCycle3Ph2();
-    void LDAStorePh2();
+    void ExecuteReadOperationPh2();
+    void Compare(Byte value, Byte operand);
+    void AddWithCarry(Byte operand);
+    void SubtractWithCarry(Byte operand);
+    void SetZN(Byte value);
+    void ImpliedInstruction(std::function<void()> operation);
+    void WriteRegisterPh1();
+    void AddIndexToAddress(Byte index);
     void SetADLPh2();
     void SetADHPh2();
     void ReadPCPh1();
@@ -130,6 +170,7 @@ class W65C02 : public Component {
         Byte IR;   // Instruction register
         Byte ADL;  // Address Data Low
         Byte ADH;  // Address Data High
+        Byte TMP;  // Temporary value used by read-modify-write instructions
 
         // Processor flags NV-BDIZC (7-0)
         struct s_P {
