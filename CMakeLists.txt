@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.29)
 project(Emulator LANGUAGES C CXX)
 
 include(FetchContent)
+include(CTest)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,3 +14,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -funroll-loops")
 file(COPY ${CMAKE_SOURCE_DIR}/logsConfig.json DESTINATION ${CMAKE_BINARY_DIR}/src)
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

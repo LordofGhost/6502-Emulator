@@ -158,7 +158,6 @@ void W65C02::callInstruction() {
             callQueue.push({[this] {
                                 registers.RW = READ;
                                 bus.setAddress((registers.ADH << 8) + registers.ADL);
-                                registers.PC++;
                             },
                             [this] { LDAStorePh2(); }});
             break;
@@ -231,7 +230,7 @@ void W65C02::IndirectYIndexedCycle3Ph2() {
         callQueue.push({[this] { ReadNextZPPh1(); }, [this] { SetADHPh2(); }});
     } else {
         // Page crossed, extra cycle needed
-        registers.ADL = registers.Y + bus.getData() - 0xFF;
+        registers.ADL = registers.Y + bus.getData() - 0x100;
         // Read high-address byte from the zero page
         callQueue.push({[this] { ReadNextZPPh1(); }});
         // Store address in ADH incremented by one, because of page cross
@@ -269,5 +268,5 @@ void W65C02::ReadADPh1() {
 
 void W65C02::ReadNextZPPh1() {
     registers.RW = READ;
-    bus.setAddress(bus.getAddress() + 1);
+    bus.setAddress(static_cast<Byte>(bus.getAddress() + 1));
 }

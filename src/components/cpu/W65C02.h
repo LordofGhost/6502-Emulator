@@ -4,6 +4,7 @@
 #define READ true
 #define WRITE false
 
+#include <array>
 #include <format>
 #include <functional>
 #include <list>
@@ -32,6 +33,62 @@ class W65C02 : public Component {
 
     void onClockCycle(Phase phase) override;
     std::string toStringMD() const;
+
+#ifdef EMULATOR_TESTING
+    struct TestState {
+        Byte A;
+        Byte X;
+        Byte Y;
+        Byte S;
+        Word PC;
+        Byte IR;
+        Byte ADL;
+        Byte ADH;
+        bool RW;
+        bool N;
+        bool V;
+        bool D;
+        bool I;
+        bool Z;
+        bool C;
+    };
+
+    struct TestInitialState {
+        Byte A = 0;
+        Byte X = 0;
+        Byte Y = 0;
+        Byte S = 0xFF;
+        bool N = false;
+        bool V = false;
+        bool D = false;
+        bool I = true;
+        bool Z = false;
+        bool C = false;
+    };
+
+    [[nodiscard]] TestState getStateForTesting() const {
+        return {
+            registers.A,   registers.X,   registers.Y,   registers.S,   registers.PC,
+            registers.IR,  registers.ADL, registers.ADH, registers.RW,  registers.P.N,
+            registers.P.V, registers.P.D, registers.P.I, registers.P.Z, registers.P.C,
+        };
+    }
+
+    void setStateForTesting(const TestInitialState& state) {
+        registers.A = state.A;
+        registers.X = state.X;
+        registers.Y = state.Y;
+        registers.S = state.S;
+        registers.P.N = state.N;
+        registers.P.V = state.V;
+        registers.P.D = state.D;
+        registers.P.I = state.I;
+        registers.P.Z = state.Z;
+        registers.P.C = state.C;
+    }
+
+    [[nodiscard]] bool hasPendingCyclesForTesting() const { return !callQueue.empty(); }
+#endif
 
    private:
     void fetch();
