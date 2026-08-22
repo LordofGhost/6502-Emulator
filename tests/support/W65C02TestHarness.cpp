@@ -43,6 +43,11 @@ bool expectedFlag(const std::optional<bool>& expected, bool initial) {
     return expected.value_or(initial);
 }
 
+std::vector<InstructionCaseGroup>& instructionCaseRegistry() {
+    static std::vector<InstructionCaseGroup> groups;
+    return groups;
+}
+
 }  // namespace
 
 InstructionResult executeInstruction(const InstructionCase& test) {
@@ -55,10 +60,10 @@ InstructionResult executeInstruction(const InstructionCase& test) {
     bus.setData(0);
 
     TestMemory memory;
-    memory.write(RESET_VECTOR_LOW, static_cast<Byte>(PROGRAM_START & 0x00FF));
-    memory.write(RESET_VECTOR_HIGH, static_cast<Byte>(PROGRAM_START >> 8));
+    memory.write(RESET_VECTOR_LOW, static_cast<Byte>(test.programStart & 0x00FF));
+    memory.write(RESET_VECTOR_HIGH, static_cast<Byte>(test.programStart >> 8));
 
-    Word cursor = PROGRAM_START;
+    Word cursor = test.programStart;
     memory.write(cursor++, test.opcode);
     for (const Byte operand : test.operands) {
         memory.write(cursor++, operand);
@@ -101,7 +106,7 @@ void verifyInstruction(const InstructionCase& test) {
     CHECK(state.Y == expectedByte(test.expected.Y, test.initial.Y));
     CHECK(state.S == expectedByte(test.expected.S, test.initial.S));
 
-    const Word defaultPC = static_cast<Word>(PROGRAM_START + 1 + test.operands.size());
+    const Word defaultPC = static_cast<Word>(test.programStart + 1 + test.operands.size());
     CHECK(state.PC == test.expected.PC.value_or(defaultPC));
     CHECK(state.IR == test.expected.IR.value_or(test.opcode));
 
@@ -122,5 +127,14 @@ void verifyInstruction(const InstructionCase& test) {
 }
 
 const std::vector<EmulatorException>& recordedExceptions() { return EmulatorExceptions; }
+
+InstructionCaseRegistration::InstructionCaseRegistration(
+    const std::string_view name, const std::vector<InstructionCase>& cases) {
+    instructionCaseRegistry().push_back({name, &cases});
+}
+
+const std::vector<InstructionCaseGroup>& registeredInstructionCases() {
+    return instructionCaseRegistry();
+}
 
 }  // namespace cpu_test

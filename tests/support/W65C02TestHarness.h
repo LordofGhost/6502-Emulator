@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <functional>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -51,10 +52,11 @@ struct MemoryExpectation {
 };
 
 struct InstructionCase {
-    std::string_view name;
+    std::string name;
     Byte opcode;
     std::vector<Byte> operands;
     std::size_t cycles;
+    Word programStart = PROGRAM_START;
     InitialState initial{};
     MemorySetup setup{};
     ExpectedState expected{};
@@ -67,8 +69,20 @@ struct InstructionResult {
     std::size_t cycles;
 };
 
+struct InstructionCaseGroup {
+    std::string_view name;
+    const std::vector<InstructionCase>* cases;
+};
+
+class InstructionCaseRegistration {
+   public:
+    InstructionCaseRegistration(std::string_view name,
+                                const std::vector<InstructionCase>& cases);
+};
+
 InstructionResult executeInstruction(const InstructionCase& test);
 void verifyInstruction(const InstructionCase& test);
+[[nodiscard]] const std::vector<InstructionCaseGroup>& registeredInstructionCases();
 [[nodiscard]] const std::vector<EmulatorException>& recordedExceptions();
 
 }  // namespace cpu_test
